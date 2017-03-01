@@ -30,8 +30,7 @@ public class TrackGPS extends Service implements LocationListener {
 
 
     boolean checkGPS = false;
-
-
+    
     boolean checkNetwork = false;
 
     boolean canGetLocation = false;
