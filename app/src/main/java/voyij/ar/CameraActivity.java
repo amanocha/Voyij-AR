@@ -5,6 +5,10 @@ import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.graphics.SurfaceTexture;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
@@ -29,7 +33,7 @@ import android.widget.Toast;
 import java.io.File;
 import java.util.Arrays;
 
-public class CameraActivity extends AppCompatActivity {
+public class CameraActivity extends AppCompatActivity implements SensorEventListener {
 
     private String cameraId;
     private static final String TAG = "AndroidCameraApi";
@@ -44,10 +48,29 @@ public class CameraActivity extends AppCompatActivity {
     private ImageReader imageReader;
     private File file;
 
+    private float[] mGravity;
+    private float[] mGeomagnetic;
+
+    private Compass mCompassSensor;
+    private Location mLocationSensor;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_camera);
+
+        SensorManager mSensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
+        // If the phone doesn't have sensors, exit the app (or do something else)
+        if(mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) == null ||
+                mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD) == null){
+            // Check to see if this actually works
+            this.finish();
+            return;
+        }
+
+        mCompassSensor = new Compass(mSensorManager);
+        mLocationSensor = new Location();
+
         textureView = (TextureView) findViewById(R.id.texture);
         assert textureView != null;
         textureView.setSurfaceTextureListener(textureListener);
@@ -211,6 +234,7 @@ public class CameraActivity extends AppCompatActivity {
         } else {
             textureView.setSurfaceTextureListener(textureListener);
         }
+        mCompassSensor.registerLocationListener(this);
     }
 
     @Override
@@ -219,5 +243,47 @@ public class CameraActivity extends AppCompatActivity {
         closeCamera();
         stopBackgroundThread();
         super.onPause();
+        mCompassSensor.unregisterLocationListener(this);
+    }
+
+    // Compass changes
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+    }
+
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+            mGravity = event.values;
+
+        }
+
+        if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
+            mGeomagnetic = event.values;
+        }
+
+        if (mGravity != null && mGeomagnetic != null) {
+            float R[] = new float[9];
+            float I[] = new float[9];
+            boolean success = SensorManager.getRotationMatrix(R, I, mGravity, mGeomagnetic);
+
+            if (success) {
+                float orientation[] = new float[3];
+                SensorManager.getOrientation(R, orientation);
+                double azimuth = normalize(180*orientation[0]/Math.PI); // orientation contains: azimuth, pitch and roll
+                double pitch = normalize(180*orientation[1]/Math.PI);
+                double roll = normalize(180*orientation[2]/Math.PI);
+
+                System.out.println(Double.toString(azimuth) + " " + Double.toString(pitch) + " " + Double.toString(roll));
+            }
+        }
+    }
+
+    private double normalize(double value) {
+        if (value >= 0.0f && value <= 180.0f) {
+            return value;
+        } else {
+            return 180 + (180 + value);
+        }
     }
 }

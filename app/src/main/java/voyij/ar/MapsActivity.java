@@ -35,20 +35,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private GoogleMap mMap;
     private GoogleApiClient mGoogleApiClient;
     private Location mLastLocation;
-    private SensorManager mSensorManager;
-    private Sensor accelerometer;
-    private Sensor magnetometer;
-
-    private float[] mGravity;
-    private float[] mGeomagnetic;
+//    private SensorManager mSensorManager;
+//    private Sensor accelerometer;
+//    private Sensor magnetometer;
+//
+//    private float[] mGravity;
+//    private float[] mGeomagnetic;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mSensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
-        accelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        magnetometer = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+//        mSensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
+//        accelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+//        magnetometer = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
 
         setContentView(R.layout.activity_maps);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -157,53 +157,52 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     protected void onResume() {
         super.onResume();
-        mSensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_UI);
-        mSensorManager.registerListener(this, magnetometer, SensorManager.SENSOR_DELAY_UI);
+//        mSensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_UI);
+//        mSensorManager.registerListener(this, magnetometer, SensorManager.SENSOR_DELAY_UI);
     }
 
     protected void onPause() {
         super.onPause();
-        mSensorManager.unregisterListener(this);
+//        mSensorManager.unregisterListener(this);
     }
 
-    @Override
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {
-    }
-
-    @Override
-    public void onSensorChanged(SensorEvent event) {
-        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-            mGravity = event.values;
-
-        }
-
-        if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
-            mGeomagnetic = event.values;
-        }
-
-        if (mGravity != null && mGeomagnetic != null) {
-            float R[] = new float[9];
-            float I[] = new float[9];
-            boolean success = SensorManager.getRotationMatrix(R, I, mGravity, mGeomagnetic);
-
-            if (success) {
-                float orientation[] = new float[3];
-                SensorManager.getOrientation(R, orientation);
-                double azimuth = normalize(180*orientation[0]/Math.PI); // orientation contains: azimuth, pitch and roll
-                double pitch = normalize(180*orientation[1]/Math.PI);
-                double roll = normalize(180*orientation[2]/Math.PI);
-
-                System.out.println(Double.toString(azimuth) + " " + Double.toString(pitch) + " " + Double.toString(roll));
-            }
-        }
-
-    }
-
-    private double normalize(double value) {
-        if (value >= 0.0f && value <= 180.0f) {
-            return value;
-        } else {
-            return 180 + (180 + value);
-        }
-    }
+//    @Override
+//    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+//    }
+//
+//    @Override
+//    public void onSensorChanged(SensorEvent event) {
+//        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+//            mGravity = event.values;
+//
+//        }
+//
+//        if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
+//            mGeomagnetic = event.values;
+//        }
+//
+//        if (mGravity != null && mGeomagnetic != null) {
+//            float R[] = new float[9];
+//            float I[] = new float[9];
+//            boolean success = SensorManager.getRotationMatrix(R, I, mGravity, mGeomagnetic);
+//
+//            if (success) {
+//                float orientation[] = new float[3];
+//                SensorManager.getOrientation(R, orientation);
+//                double azimuth = normalize(180*orientation[0]/Math.PI); // orientation contains: azimuth, pitch and roll
+//                double pitch = normalize(180*orientation[1]/Math.PI);
+//                double roll = normalize(180*orientation[2]/Math.PI);
+//
+//                System.out.println(Double.toString(azimuth) + " " + Double.toString(pitch) + " " + Double.toString(roll));
+//            }
+//        }
+//    }
+//
+//    private double normalize(double value) {
+//        if (value >= 0.0f && value <= 180.0f) {
+//            return value;
+//        } else {
+//            return 180 + (180 + value);
+//        }
+//    }
 }
