@@ -17,6 +17,7 @@ import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.params.StreamConfigurationMap;
+import android.location.Location;
 import android.media.ImageReader;
 import android.os.Bundle;
 import android.os.Handler;
@@ -32,8 +33,9 @@ import android.widget.Toast;
 
 import java.io.File;
 import java.util.Arrays;
+import com.google.android.gms.location.LocationListener;
 
-public class CameraActivity extends AppCompatActivity implements SensorEventListener {
+public class CameraActivity extends AppCompatActivity implements SensorEventListener, LocationListener {
 
     private String cameraId;
     private static final String TAG = "AndroidCameraApi";
@@ -52,7 +54,7 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
     private float[] mGeomagnetic;
 
     private Compass mCompassSensor;
-    private Location mLocationSensor;
+    private LocationGPS mLocationSensor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,14 +69,36 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
             this.finish();
             return;
         }
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+            System.out.println("FAILED");
+//            return;
+        }
 
         mCompassSensor = new Compass(mSensorManager);
-        mLocationSensor = new Location();
+        mLocationSensor = new LocationGPS(this, this);
 
         textureView = (TextureView) findViewById(R.id.texture);
         assert textureView != null;
         textureView.setSurfaceTextureListener(textureListener);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+    }
+
+    protected void onStart() {
+        super.onStart();
+        mLocationSensor.start();
+    }
+
+    protected void onStop() {
+        super.onStop();
+        mLocationSensor.stop();
     }
 
     TextureView.SurfaceTextureListener textureListener = new TextureView.SurfaceTextureListener() {
@@ -285,5 +309,10 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
         } else {
             return 180 + (180 + value);
         }
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        Toast.makeText(this, "Location Changed", Toast.LENGTH_SHORT).show();
     }
 }
