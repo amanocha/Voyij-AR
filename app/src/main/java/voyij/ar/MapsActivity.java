@@ -1,65 +1,78 @@
 package voyij.ar;
 
-import android.*;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.content.pm.PackageManager;
-import android.content.Context;
+import android.hardware.SensorEventListener;
+import android.hardware.Sensor;
+import android.hardware.SensorManager;
+import android.hardware.SensorEvent;
+import android.location.Location;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutCompat;
+import android.widget.Toast;
+import java.lang.Math;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 
-import android.location.*;
-import android.util.*;
-import android.widget.TextView;
-
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener {
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener,
+        GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, SensorEventListener {
 
     private GoogleMap mMap;
-    protected LocationManager locationManager;
-    protected LocationListener locationListener;
-    protected Context context;
-    private TextView textLat;
+    private GoogleApiClient mGoogleApiClient;
+    private Location mLastLocation;
+    private SensorManager mSensorManager;
+    private Sensor accelerometer;
+    private Sensor magnetometer;
+
+    private float[] mGravity;
+    private float[] mGeomagnetic;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        mSensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
+        accelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        magnetometer = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+
         setContentView(R.layout.activity_maps);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-        textLat = (TextView) findViewById(R.id.textview1);
 
-        // Here, thisActivity is the current activity
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // Should we show an explanation?
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
-
-                // Show an explanation to the user *asynchronously* -- don't block
-                // this thread waiting for the user's response! After the user
-                // sees the explanation, try again to request the permission.
-
-            } else {
-
-                // No explanation needed, we can request the permission.
-
-                ActivityCompat.requestPermissions(thisActivity,
-                        new String[]{Manifest.permission.READ_CONTACTS},
-                        MY_PERMISSIONS_REQUEST_READ_CONTACTS);
-
-                // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
-                // app-defined int constant. The callback method gets the
-                // result of the request.
-            }
+        if (mGoogleApiClient == null) {
+            mGoogleApiClient = new GoogleApiClient.Builder(this)
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
+                    .addApi(LocationServices.API)
+                    .build();
         }
+    }
+
+    protected void onStart() {
+        mGoogleApiClient.connect();
+        super.onStart();
+    }
+
+    protected void onStop() {
+        mGoogleApiClient.disconnect();
+        super.onStop();
     }
 
 
@@ -76,87 +89,121 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        // Add a marker in Sydney and move the camera
-        LatLng dukeChapel = new LatLng(36.001901, -78.940278);
-        LatLng westUnion = new LatLng(36.000798, -78.939011);
-        LatLng LSRC = new LatLng(36.004361, -78.941871);
-        mMap.addMarker(new MarkerOptions().position(dukeChapel).title("Marker at Duke Chapel").icon(BitmapDescriptorFactory.fromResource(R.drawable.star)));
-        mMap.addMarker(new MarkerOptions().position(westUnion).title("Marker at West Union").icon(BitmapDescriptorFactory.fromResource(R.drawable.food)));
-        mMap.addMarker(new MarkerOptions().position(LSRC).title("Marker at LSRC").icon(BitmapDescriptorFactory.fromResource(R.drawable.building)));
+        LatLng chapel = new LatLng(36.001901, -78.940278);
 
-        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            mMap.setMyLocationEnabled(true);
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+            System.out.println("FAILED");
+//            return;
         }
+        mMap.setMyLocationEnabled(true);
+        mMap.addMarker(new MarkerOptions().position(chapel).title("The Chapel"));
+//        mMap.moveCamera(CameraUpdateFactory.zoomTo(15));
+//        mMap.moveCamera(CameraUpdateFactory.newLatLng(chapel));
+        mMap.setOnMarkerClickListener(this);
+    }
 
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+        System.out.println("MARKER CLICK");
+        return false;
+    }
 
+    @Override
+    @SuppressWarnings({"MissingPermission"})
+    public void onConnected(@Nullable Bundle bundle) {
+        LocationRequest locationRequest = new LocationRequest();
+        locationRequest.setInterval(1000);
+        locationRequest.setFastestInterval(1000);
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, locationRequest, this);
+        mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+        if (mLastLocation != null) {
+            mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude())));
+            mMap.moveCamera(CameraUpdateFactory.zoomTo(15));
+            Toast.makeText(this, "LOCATION", Toast.LENGTH_LONG).show();
+        }
+    }
 
-        LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
+    @Override
+    public void onConnectionSuspended(int i) {
 
-        double longitude = -78.940278, latitude = 36.001901;
-        //LocationManager myLocManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+    }
 
-        /*TrackGPS gps = new TrackGPS(MapsActivity.this);
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
 
-
-        if(gps.canGetLocation()){
-            System.out.println("data " + longitude + " " + latitude);
-            longitude = gps.getLongitude();
-            latitude = gps.getLatitude();
-            System.out.println("data " + longitude + " " + latitude);
-        } else {
-            System.out.println("bye");
-            gps.showSettingsAlert();
-        }*/
-
-        LatLng userLocation = new LatLng(latitude,longitude);
-
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 15));
-        mMap.animateCamera(CameraUpdateFactory.zoomIn());
     }
 
     @Override
     public void onLocationChanged(Location location) {
-        textLat = (TextView) findViewById(R.id.textview1);
-        textLat.setText("Latitude:" + location.getLatitude() + ", Longitude:" + location.getLongitude());
+        mLastLocation = location;
+        if (mLastLocation == null) {
+            Toast.makeText(this, "Null Location", Toast.LENGTH_LONG).show();
+        }
+        else {
+            mMap.animateCamera(CameraUpdateFactory.newLatLng(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude())));
+            Toast.makeText(this, "Location Changed", Toast.LENGTH_LONG).show();
+
+        }
+    }
+
+    protected void onResume() {
+        super.onResume();
+        mSensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_UI);
+        mSensorManager.registerListener(this, magnetometer, SensorManager.SENSOR_DELAY_UI);
+    }
+
+    protected void onPause() {
+        super.onPause();
+        mSensorManager.unregisterListener(this);
     }
 
     @Override
-    public void onProviderDisabled(String provider) {
-        Log.d("Latitude","disable");
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
     }
 
     @Override
-    public void onProviderEnabled(String provider) {
-        Log.d("Latitude","enable");
-    }
+    public void onSensorChanged(SensorEvent event) {
+        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+            mGravity = event.values;
 
-    @Override
-    public void onStatusChanged(String provider, int status, Bundle extras) {
-        Log.d("Latitude","status");
-    }
+        }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
-        switch (requestCode) {
-            case MY_PERMISSIONS_REQUEST_READ_CONTACTS: {
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+        if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
+            mGeomagnetic = event.values;
+        }
 
-                    // permission was granted, yay! Do the
-                    // contacts-related task you need to do.
+        if (mGravity != null && mGeomagnetic != null) {
+            float R[] = new float[9];
+            float I[] = new float[9];
+            boolean success = SensorManager.getRotationMatrix(R, I, mGravity, mGeomagnetic);
 
-                } else {
+            if (success) {
+                float orientation[] = new float[3];
+                SensorManager.getOrientation(R, orientation);
+                double azimuth = normalize(180*orientation[0]/Math.PI); // orientation contains: azimuth, pitch and roll
+                double pitch = normalize(180*orientation[1]/Math.PI);
+                double roll = normalize(180*orientation[2]/Math.PI);
 
-                    // permission denied, boo! Disable the
-                    // functionality that depends on this permission.
-                }
-                return;
+                System.out.println(Double.toString(azimuth) + " " + Double.toString(pitch) + " " + Double.toString(roll));
             }
+        }
 
-            // other 'case' lines to check for other
-            // permissions this app might request
+    }
+
+    private double normalize(double value) {
+        if (value >= 0.0f && value <= 180.0f) {
+            return value;
+        } else {
+            return 180 + (180 + value);
         }
     }
 }
