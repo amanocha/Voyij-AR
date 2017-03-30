@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
+import android.graphics.Point;
 import android.graphics.SurfaceTexture;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -27,8 +28,10 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.util.Size;
+import android.view.Display;
 import android.view.Surface;
 import android.view.TextureView;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import java.io.File;
@@ -49,6 +52,7 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
     private HandlerThread mBackgroundThread;
     private ImageReader imageReader;
     private File file;
+    private CameraManager cameraManager;
 
     private float[] mGravity;
     private float[] mGeomagnetic;
@@ -56,10 +60,30 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
     private Compass mCompassSensor;
     private LocationGPS mLocationSensor;
 
+    private Location mCurrentLocation;
+    private float[] mCurrentOrientation;
+
+    ImageView picture;
+    int bottomBarHeight;
+    private Point activityScreenSize;
+    private Point fullScreenSize;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_camera);
+        picture = (ImageView) findViewById(R.id.imageView1);
+
+        Display display = getWindowManager().getDefaultDisplay();
+        fullScreenSize = new Point();
+        display.getRealSize(fullScreenSize);
+        activityScreenSize = new Point();
+        display.getSize(activityScreenSize);
+        bottomBarHeight = fullScreenSize.y - activityScreenSize.y;
+
+//        picture.setX(fullScreenSize.x/2);
+//        picture.setY(fullScreenSize.y/2 - bottomBarHeight);
+
 
         SensorManager mSensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
         // If the phone doesn't have sensors, exit the app (or do something else)
@@ -89,11 +113,13 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
         assert textureView != null;
         textureView.setSurfaceTextureListener(textureListener);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        System.out.println("TV height:" + getWindow().getDecorView().getHeight());
     }
 
     protected void onStart() {
         super.onStart();
         mLocationSensor.start();
+
     }
 
     protected void onStop() {
@@ -139,20 +165,12 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
         }
     };
 
-//    final CameraCaptureSession.CaptureCallback captureCallbackListener = new CameraCaptureSession.CaptureCallback() {
-//        @Override
-//        public void onCaptureCompleted(CameraCaptureSession session, CaptureRequest request, TotalCaptureResult result) {
-//            super.onCaptureCompleted(session, request, result);
-//            Toast.makeText(AndroidCamera2API.this, "Saved:" + file, Toast.LENGTH_SHORT).show();
-//            createCameraPreview();
-//        }
-//    };
-
     protected void startBackgroundThread() {
         mBackgroundThread = new HandlerThread("Camera Background");
         mBackgroundThread.start();
         mBackgroundHandler = new Handler(mBackgroundThread.getLooper());
     }
+
     protected void stopBackgroundThread() {
         mBackgroundThread.quitSafely();
         try {
@@ -194,11 +212,11 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
     }
 
     private void openCamera() {
-        CameraManager manager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
+        cameraManager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
         Log.e(TAG, "is camera open");
         try {
-            cameraId = manager.getCameraIdList()[0];
-            CameraCharacteristics characteristics = manager.getCameraCharacteristics(cameraId);
+            cameraId = cameraManager.getCameraIdList()[0];
+            CameraCharacteristics characteristics = cameraManager.getCameraCharacteristics(cameraId);
             StreamConfigurationMap map = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
             assert map != null;
             imageDimension = map.getOutputSizes(SurfaceTexture.class)[0];
@@ -207,7 +225,7 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
                 ActivityCompat.requestPermissions(CameraActivity.this, new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_CAMERA_PERMISSION);
                 return;
             }
-            manager.openCamera(cameraId, stateCallback, null);
+            cameraManager.openCamera(cameraId, stateCallback, null);
         } catch (CameraAccessException e) {
             e.printStackTrace();
         }
@@ -275,6 +293,7 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
     }
 
+    int x = 1;
     @Override
     public void onSensorChanged(SensorEvent event) {
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
@@ -294,16 +313,24 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
             if (success) {
                 float orientation[] = new float[3];
                 SensorManager.getOrientation(R, orientation);
-                double azimuth = normalize(180*orientation[0]/Math.PI); // orientation contains: azimuth, pitch and roll
-                double pitch = normalize(180*orientation[1]/Math.PI);
-                double roll = normalize(180*orientation[2]/Math.PI);
 
-                System.out.println(Double.toString(azimuth) + " " + Double.toString(pitch) + " " + Double.toString(roll));
+                float azimuth = normalize(180*orientation[0]/ARMath.PI); // orientation contains: azimuth, pitch and roll
+                float pitch = normalize(180*orientation[1]/ARMath.PI);
+                float roll = normalize(180*orientation[2]/ARMath.PI);
+
+                orientation[0] = azimuth; //Angle between device's current compass direction and magnetic north
+                orientation[1] = pitch; //Angle between a plane parallel to device's screen and a plane parallel to ground
+                orientation[2] = roll; //Angle between a plane perpendicular to device's screen and a plane perpendicular to ground
+
+                //System.out.println(Double.toString(azimuth) + " " + Double.toString(pitch) + " " + Double.toString(roll));
+                //Toast.makeText(this, "Orientation Changed", Toast.LENGTH_SHORT).show();
+                mCurrentOrientation = orientation;
+                doMath();
             }
         }
     }
 
-    private double normalize(double value) {
+    private float normalize(float value) {
         if (value >= 0.0f && value <= 180.0f) {
             return value;
         } else {
@@ -314,5 +341,32 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
     @Override
     public void onLocationChanged(Location location) {
         Toast.makeText(this, "Location Changed", Toast.LENGTH_SHORT).show();
+        mCurrentLocation = location;
+        doMath();
+    }
+
+
+
+    public void doMath(){
+        if(mCurrentLocation != null){
+            //Toast.makeText(this, Double.toString(ARMath.getAbsoluteAngleOfPOI(mCurrentLocation.getLongitude(), mCurrentLocation.getLatitude(), -78.940278, 36.001901)), Toast.LENGTH_SHORT).show();
+            Double absoluteAngle = ARMath.getAbsoluteAngleOfPOI(mCurrentLocation.getLongitude(), mCurrentLocation.getLatitude(), -78.940278, 36.001901);
+            //System.out.println("Absolute angle: " + Double.toString(absoluteAngle));
+
+            Double relativeAngle = ARMath.getRelativeAngleOfPOI(mCurrentOrientation[0], absoluteAngle);
+            //System.out.println("Relative angle: " + Double.toString(relativeAngle));
+
+//            //programmatically add image
+//            Display display = getWindowManager().getDefaultDisplay();
+//            Point size = new Point();
+//            display.getSize(size);
+//            int width = this.getResources().getDisplayMetrics().widthPixels;
+//            int height = this.getResources().getDisplayMetrics().heightPixels;
+
+            if(relativeAngle/35 <= 1) {
+                picture.setX((float) (relativeAngle/35 * activityScreenSize.x));
+                picture.setY(fullScreenSize.x/2 - bottomBarHeight);
+            }
+        }
     }
 }
