@@ -6,6 +6,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Point;
 import android.graphics.SurfaceTexture;
+import android.hardware.Camera;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -18,6 +19,7 @@ import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.params.StreamConfigurationMap;
+import android.hardware.camera2.CameraCharacteristics.*;
 import android.location.Location;
 import android.media.ImageReader;
 import android.os.Bundle;
@@ -27,10 +29,12 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.util.SizeF;
 import android.util.Size;
 import android.view.Display;
 import android.view.Surface;
 import android.view.TextureView;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -331,10 +335,10 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
     }
 
     private float normalize(float value) {
-        if (value >= 0.0f && value <= 180.0f) {
-            return value;
+        if (value < 0) {
+            return (360 + value);
         } else {
-            return 180 + (180 + value);
+            return value;
         }
     }
 
@@ -350,10 +354,27 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
     public void doMath(){
         if(mCurrentLocation != null){
             //Toast.makeText(this, Double.toString(ARMath.getAbsoluteAngleOfPOI(mCurrentLocation.getLongitude(), mCurrentLocation.getLatitude(), -78.940278, 36.001901)), Toast.LENGTH_SHORT).show();
+
             Double absoluteAngle = ARMath.getAbsoluteAngleOfPOI(mCurrentLocation.getLongitude(), mCurrentLocation.getLatitude(), -78.940278, 36.001901);
+            Double relativeAngle = ARMath.getRelativeAngleOfPOI(mCurrentOrientation[0], absoluteAngle);
             //System.out.println("Absolute angle: " + Double.toString(absoluteAngle));
 
-            Double relativeAngle = ARMath.getRelativeAngleOfPOI(mCurrentOrientation[0], absoluteAngle);
+            double direction = ARMath.getPOIDirection(mCurrentLocation.getLongitude(), mCurrentLocation.getLatitude(), -78.940278, 36.001901);
+            double difference = ARMath.getRelativeAngleOfPOI(mCurrentOrientation[0], direction);
+            double fov_x = 45;
+
+            try {
+                CameraCharacteristics manager = cameraManager.getCameraCharacteristics(cameraId);
+                float focalLength = manager.get(CameraCharacteristics.LENS_INFO_AVAILABLE_FOCAL_LENGTHS)[0];
+                SizeF size = manager.get(CameraCharacteristics.SENSOR_INFO_PHYSICAL_SIZE);
+                float width = size.getWidth();
+                fov_x = Math.toDegrees(2*Math.atan(width/2/focalLength));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            //Log.d("CREATION", "Relative angle: " + Double.toString(difference) + " " + Double.toString(mCurrentOrientation[0]));
+            Log.d("CREATION", Double.toString(mCurrentOrientation[0]) + " " + Double.toString(mCurrentOrientation[1]) + " " + Double.toString(mCurrentOrientation[2]));
             //System.out.println("Relative angle: " + Double.toString(relativeAngle));
 
 //            //programmatically add image
@@ -363,9 +384,19 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
 //            int width = this.getResources().getDisplayMetrics().widthPixels;
 //            int height = this.getResources().getDisplayMetrics().heightPixels;
 
-            if(relativeAngle/35 <= 1) {
-                picture.setX((float) (relativeAngle/35 * activityScreenSize.x));
+            //Log.d("CREATION", Double.toString(fov));
+
+            if(difference/fov_x <= 1) {
+                picture.setVisibility(View.VISIBLE);
+                if (ARMath.getSide(mCurrentOrientation[0], direction, fov_x) == 0) {
+                    //Log.d("CREATION", Double.toString(mCurrentOrientation[0]) + " " + Double.toString((0.5 + difference/fov/2)));
+                    picture.setX((float) (activityScreenSize.x*(0.5 + difference/fov_x/2) - picture.getWidth()/2));
+                } else {
+                    picture.setX((float) (activityScreenSize.x*(0.5 - difference/fov_x/2) - picture.getWidth()/2));
+                }
                 picture.setY(fullScreenSize.x/2 - bottomBarHeight);
+            } else {
+                picture.setVisibility(View.INVISIBLE);
             }
         }
     }

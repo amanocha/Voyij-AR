@@ -33,12 +33,45 @@ public class ARMath {
         return -1;
     }
 
+    public static double getPOIDirection(double phoneLat, double phoneLong, double poiLat, double poiLong) {
+        double x = poiLong - phoneLong;
+        double y = poiLat - phoneLat;
+
+        double direction = Math.toDegrees(Math.atan2(y, x));
+
+        if (phoneLong == poiLong && phoneLat == poiLat) {
+            return -2;
+        } else {
+            if (direction > 0) {
+                return direction;
+            } else {
+                return direction + 360;
+            }
+        }
+    }
+
     public static double getRelativeAngleOfPOI(double phoneAngle, double poiAbsoluteAngle){
         double difference = Math.abs(phoneAngle-poiAbsoluteAngle);
         if(difference > 180){
             return 360 - difference;
         } else {
             return difference;
+        }
+    }
+
+    public static int getSide(double phoneAngle, double poiAbsoluteAngle, double fov) {
+        if (phoneAngle < poiAbsoluteAngle) {
+            if ((poiAbsoluteAngle - phoneAngle) >= fov) {
+                return 1; //right
+            } else {
+                return 0; //left
+            }
+        } else {
+            if ((poiAbsoluteAngle - phoneAngle) >= fov) {
+                return 0; //left
+            } else {
+                return 1; //right
+            }
         }
     }
 
