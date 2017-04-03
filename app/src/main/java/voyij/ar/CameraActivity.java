@@ -60,6 +60,7 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
 
     private float[] mGravity;
     private float[] mGeomagnetic;
+    private float[] smoothed;
 
     private Compass mCompassSensor;
     private LocationGPS mLocationSensor;
@@ -112,6 +113,10 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
 
         mCompassSensor = new Compass(mSensorManager);
         mLocationSensor = new LocationGPS(this, this);
+
+        mGravity = new float[3];
+        mGeomagnetic = new float[3];
+        smoothed = new float[3];
 
         textureView = (TextureView) findViewById(R.id.texture);
         assert textureView != null;
@@ -300,16 +305,23 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
     int x = 1;
     @Override
     public void onSensorChanged(SensorEvent event) {
-        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-            mGravity = event.values;
+        final float alpha = 0.97f;
 
-        }
+        synchronized (this) {
+            if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+                //mGravity = event.values;
+                mGravity[0] = alpha * mGravity[0] + (1 - alpha) * event.values[0];
+                mGravity[1] = alpha * mGravity[1] + (1 - alpha) * event.values[1];
+                mGravity[2] = alpha * mGravity[2] + (1 - alpha) * event.values[2];
+            }
 
-        if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
-            mGeomagnetic = event.values;
-        }
+            if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
+                //mGeomagnetic = event.values;
+                mGeomagnetic[0] = alpha * mGeomagnetic[0] + (1 - alpha) * event.values[0];
+                mGeomagnetic[1] = alpha * mGeomagnetic[1] + (1 - alpha) * event.values[1];
+                mGeomagnetic[2] = alpha * mGeomagnetic[2] + (1 - alpha) * event.values[2];
+            }
 
-        if (mGravity != null && mGeomagnetic != null) {
             float R[] = new float[9];
             float I[] = new float[9];
             boolean success = SensorManager.getRotationMatrix(R, I, mGravity, mGeomagnetic);
@@ -318,13 +330,13 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
                 float orientation[] = new float[3];
                 SensorManager.getOrientation(R, orientation);
 
-                float azimuth = normalize(180*orientation[0]/ARMath.PI); // orientation contains: azimuth, pitch and roll
-                float pitch = normalize(180*orientation[1]/ARMath.PI);
-                float roll = normalize(180*orientation[2]/ARMath.PI);
+                float azimuth = normalize(Math.toDegrees(orientation[0])); // orientation contains: azimuth, pitch and roll
+                float pitch = normalize(Math.toDegrees(orientation[1]));
+                float roll = normalize(Math.toDegrees(orientation[2]));
 
-                orientation[0] = azimuth; //Angle between device's current compass direction and magnetic north
-                orientation[1] = pitch; //Angle between a plane parallel to device's screen and a plane parallel to ground
-                orientation[2] = roll; //Angle between a plane perpendicular to device's screen and a plane perpendicular to ground
+                orientation[0] = Math.round(azimuth); //Angle between device's current compass direction and magnetic north
+                orientation[1] = Math.round(pitch); //Angle between a plane parallel to device's screen and a plane parallel to ground
+                orientation[2] = Math.round(roll); //Angle between a plane perpendicular to device's screen and a plane perpendicular to ground
 
                 //System.out.println(Double.toString(azimuth) + " " + Double.toString(pitch) + " " + Double.toString(roll));
                 //Toast.makeText(this, "Orientation Changed", Toast.LENGTH_SHORT).show();
@@ -334,11 +346,11 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
         }
     }
 
-    private float normalize(float value) {
+    private float normalize(double value) {
         if (value < 0) {
-            return (360 + value);
+            return (360 + (float)value);
         } else {
-            return value;
+            return (float)value;
         }
     }
 
@@ -374,8 +386,7 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
             }
 
             //Log.d("CREATION", "Relative angle: " + Double.toString(difference) + " " + Double.toString(mCurrentOrientation[0]));
-            Log.d("CREATION", Double.toString(mCurrentOrientation[0]) + " " + Double.toString(mCurrentOrientation[1]) + " " + Double.toString(mCurrentOrientation[2]));
-            //System.out.println("Relative angle: " + Double.toString(relativeAngle));
+            //Log.d("CREATION", Double.toString(mCurrentOrientation[0]) + " " + Double.toString(mCurrentOrientation[1]) + " " + Double.toString(mCurrentOrientation[2]));
 
 //            //programmatically add image
 //            Display display = getWindowManager().getDefaultDisplay();
