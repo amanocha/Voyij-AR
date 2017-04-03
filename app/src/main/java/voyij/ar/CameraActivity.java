@@ -71,7 +71,17 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
     int bottomBarHeight;
     private Point activityScreenSize;
     private Point fullScreenSize;
+    private POI[] points;
 
+
+    private void createPoints() {
+        points = new POI[5];
+        points[0] = new POI("Chapel", 36.001901, -78.940278);
+        points[1] = new POI("West Union",36.000798 ,-78.939011);
+        points[2] = new POI("Cameron",35.997592 ,-78.942173);
+        points[3] = new POI("Fuqua", 35.998843,-78.947274);
+        points[4] = new POI("LSRC",36.004361 ,-78.941871);
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -118,6 +128,7 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
         textureView.setSurfaceTextureListener(textureListener);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         System.out.println("TV height:" + getWindow().getDecorView().getHeight());
+        createPoints();
     }
 
     protected void onStart() {
