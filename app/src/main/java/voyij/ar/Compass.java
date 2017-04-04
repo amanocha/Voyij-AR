@@ -22,8 +22,8 @@ public class Compass {
     }
 
     public void registerLocationListener(SensorEventListener sensorEventListener){
-        mSensorManager.registerListener(sensorEventListener, mAccelerometer, SensorManager.SENSOR_DELAY_UI);
-        mSensorManager.registerListener(sensorEventListener, mMagnetometer, SensorManager.SENSOR_DELAY_UI);
+        mSensorManager.registerListener(sensorEventListener, mAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+        mSensorManager.registerListener(sensorEventListener, mMagnetometer, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
     public void unregisterLocationListener(SensorEventListener sensorEventListener){

@@ -50,12 +50,51 @@ public class ARMath {
         }
     }
 
+    public static double getPOIDistance(double phoneLat, double phoneLong, double poiLat, double poiLong){
+        //Haversine
+        double a = Math.pow(Math.sin((Math.toRadians(phoneLat) - Math.toRadians(poiLat))/2),2)
+                + Math.cos(Math.toRadians(poiLat)) * Math.cos(Math.toRadians(phoneLat))
+                * Math.pow(Math.sin((Math.toRadians(phoneLong) - Math.toRadians(poiLong))/2),2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        double d = 6371 * c;
+        return d;
+    }
+
+    public static double getHeightDifference(double phoneAlt, double poiAlt){
+        return poiAlt - phoneAlt;
+    }
+
+    public static double getAbsoluteHeightAngle(double distance, double height){
+        double angle = Math.toDegrees(Math.atan2(height, distance));
+        if (distance == 0 && height == 0){
+            return -2;
+        } else {
+            if(angle >= 0){
+                return angle;
+            } else {
+                return angle + 360;
+            }
+        }
+    }
+
+    public static double getRelativeHeightAngle(double phoneAngle, double absoluteAngle){
+        return Math.abs((phoneAngle + 90) - absoluteAngle);
+    }
+
     public static double getRelativeAngleOfPOI(double phoneAngle, double poiAbsoluteAngle){
         double difference = Math.abs(phoneAngle-poiAbsoluteAngle);
         if(difference > 180){
             return 360 - difference;
         } else {
             return difference;
+        }
+    }
+
+    public static int getAboveBelow(double phoneAngle, double poiAbsoluteAngle){
+        if ((phoneAngle + 90) < poiAbsoluteAngle){
+            return 0; //phone is looking above poi, so poi should be on bottom of screen
+        } else {
+            return 1; //phone is looking below poi, so poi should be on top of screen
         }
     }
 
