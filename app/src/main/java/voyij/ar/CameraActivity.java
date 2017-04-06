@@ -1,6 +1,7 @@
 package voyij.ar;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
@@ -35,12 +36,14 @@ import android.view.Display;
 import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.Toast;
 
 import java.io.File;
 import java.util.Arrays;
 import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.phenotype.Configuration;
 
 public class CameraActivity extends AppCompatActivity implements SensorEventListener, LocationListener {
 
@@ -131,7 +134,7 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
         textureView = (TextureView) findViewById(R.id.texture);
         assert textureView != null;
         textureView.setSurfaceTextureListener(textureListener);
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        //setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         System.out.println("TV height:" + getWindow().getDecorView().getHeight());
         createPoints();
     }
@@ -329,6 +332,11 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
     @Override
     public void onSensorChanged(SensorEvent event) {
         // final float alpha = 0.97f;
+
+        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+            int deviceOrientation = getResources().getConfiguration().orientation;
+            System.out.println(deviceOrientation);
+        }
 
         synchronized (this) {
             if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
