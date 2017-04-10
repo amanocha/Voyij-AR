@@ -69,16 +69,17 @@ public class ARMath {
         if (distance == 0 && height == 0){
             return -2;
         } else {
-            if(angle >= 0){
-                return angle;
-            } else {
-                return angle + 360;
-            }
+            return angle;
+//            if(angle >= 0){
+//                return angle;
+//            } else {
+//                return angle + 360;
+//            }
         }
     }
 
     public static double getRelativeHeightAngle(double phoneAngle, double absoluteAngle){
-        return Math.abs((phoneAngle + 90) - absoluteAngle);
+        return phoneAngle - absoluteAngle;
     }
 
     public static double getRelativeAngleOfPOI(double phoneAngle, double poiAbsoluteAngle){
@@ -97,6 +98,10 @@ public class ARMath {
             return 1; //phone is looking below poi, so poi should be on top of screen
         }
     }
+
+//    public static int getLeftRight(double phoneAngle, double poiAbsoluteAngle){
+//
+//    }
 
     public static int getSide(double phoneAngle, double poiAbsoluteAngle, double fov) {
         if (phoneAngle < poiAbsoluteAngle) {

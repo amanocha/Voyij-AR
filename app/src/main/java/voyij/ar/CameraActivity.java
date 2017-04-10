@@ -83,6 +83,7 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
         points[3] = new POI("Fuqua", 35.998843,-78.947274);
         points[4] = new POI("LSRC",36.004361 ,-78.941871);
     }
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -131,7 +132,7 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
         textureView = (TextureView) findViewById(R.id.texture);
         assert textureView != null;
         textureView.setSurfaceTextureListener(textureListener);
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        //setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         System.out.println("TV height:" + getWindow().getDecorView().getHeight());
         createPoints();
     }
@@ -318,91 +319,42 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
 
     protected float[] lowPass(float[] input, float[] output) {
         if (output == null) return input;
-
         for (int i=0; i<input.length; i++) {
             output[i] = output[i] + alpha * (input[i] - output[i]);
         }
-
         return output;
     }
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        // final float alpha = 0.97f;
+        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+            mGravity = lowPass(event.values.clone(), mGravity);
+        }
 
-        synchronized (this) {
-            if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-                //mGravity = event.values;
-//                mGravity[0] = alpha * mGravity[0] + (1 - alpha) * event.values[0];
-//                mGravity[1] = alpha * mGravity[1] + (1 - alpha) * event.values[1];
-//                mGravity[2] = alpha * mGravity[2] + (1 - alpha) * event.values[2];
-                mGravity = lowPass(event.values.clone(), mGravity);
-            }
+        if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
+            mGeomagnetic = lowPass(event.values.clone(), mGeomagnetic);
+        }
 
-            if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
-                //mGeomagnetic = event.values;
-//                mGeomagnetic[0] = alpha * mGeomagnetic[0] + (1 - alpha) * event.values[0];
-//                mGeomagnetic[1] = alpha * mGeomagnetic[1] + (1 - alpha) * event.values[1];
-//                mGeomagnetic[2] = alpha * mGeomagnetic[2] + (1 - alpha) * event.values[2];
-                mGeomagnetic = lowPass(event.values.clone(), mGeomagnetic);
-            }
+        if (mGravity != null && mGeomagnetic != null) {
+            float R[] = new float[9];
+            float I[] = new float[9];
+            SensorManager.getRotationMatrix(R, I, mGravity, mGeomagnetic);
+            boolean success = SensorManager.remapCoordinateSystem(R, SensorManager.AXIS_X, SensorManager.AXIS_Z, R);
 
-//            if(mGravity != null && mGeomagnetic != null){
-//                float R[] = new float[9];
-//                float I[] = new float[9];
-//                SensorManager.getRotationMatrix(R, I, mGravity, mGeomagnetic);
-//                System.out.println((([0]*180)/Math.PI)+180);
-//            }
+            if (success) {
+                float orientation[] = new float[3];
+                SensorManager.getOrientation(R, orientation);
 
-            if (mGravity != null && mGeomagnetic != null) {
-                float R[] = new float[9];
-                float I[] = new float[9];
-                boolean success = SensorManager.getRotationMatrix(R, I, mGravity, mGeomagnetic);
-                if (success) {
-                    float orientation[] = new float[3];
-                    SensorManager.getOrientation(R, orientation);
-                    // at this point, orientation contains the azimuth, pitch and roll values.
-                    // System.out.println("Azimuth: " + normalize(Math.toDegrees(orientation[0])));
-                    //System.out.println("Pitch: " + Math.toDegrees(orientation[1]));
-                    //System.out.println("Roll: " + Math.toDegrees(orientation[2]));
+                orientation[0] = normalize(Math.toDegrees(orientation[0])); //azimuth
+                orientation[1] = (float) Math.toDegrees(orientation[1]); //pitch
+                orientation[2] = normalize(Math.toDegrees(orientation[2])); //roll
+                //System.out.println("Azimuth:" + orientation[0] + " Pitch:" + orientation[1] + " Roll:" + orientation[2]);
 
-                    orientation[0] = normalize(Math.toDegrees(orientation[0])); //azimuth
-                    orientation[1] = (float) Math.toDegrees(orientation[1]); //pitch
-                    orientation[2] = normalize(Math.toDegrees(orientation[2])); //roll
-
-                    mCurrentOrientation = orientation;
-                    doMath();
-                }
+                mCurrentOrientation = orientation;
+                doMath();
             }
         }
     }
-
-//            float R[] = new float[9];
-//            float I[] = new float[9];
-//            boolean success = SensorManager.getRotationMatrix(R, I, mGravity, mGeomagnetic);
-//
-//            if (success) {
-//                float orientation[] = new float[3];
-//                SensorManager.getOrientation(R, orientation);
-//
-//                float azimuth = normalize(Math.toDegrees(orientation[0])); // orientation contains: azimuth, pitch and roll
-//                float pitch = normalize(Math.toDegrees(orientation[1]));
-//                float roll = normalize(Math.toDegrees(orientation[2]));
-//
-//                //orientation[0] = azimuth;
-//                System.out.println(azimuth);
-//
-//                orientation[0] = Math.round(azimuth); //Angle between device's current compass direction and magnetic north
-//                orientation[1] = Math.round(pitch); //Angle between a plane parallel to device's screen and a plane parallel to ground
-//                orientation[2] = Math.round(roll); //Angle between a plane perpendicular to device's screen and a plane perpendicular to ground
-//
-//                //System.out.println("Compass heading: " + orientation[0]);
-//                //System.out.println(Double.toString(azimuth) + " " + Double.toString(pitch) + " " + Double.toString(roll));
-//                //Toast.makeText(this, "Orientation Changed", Toast.LENGTH_SHORT).show();
-//                mCurrentOrientation = orientation;
-//                doMath();
-//            }
-        //}
 
     private float normalize(double value) {
         if (value < 0) {
@@ -419,8 +371,8 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
         doMath();
     }
 
-
-
+    double previousDifferenceX = 0;
+    double previousDifferenceY = 0;
     public void doMath(){
         if(mCurrentLocation != null){
             //Toast.makeText(this, Double.toString(ARMath.getAbsoluteAngleOfPOI(mCurrentLocation.getLongitude(), mCurrentLocation.getLatitude(), -78.940278, 36.001901)), Toast.LENGTH_SHORT).show();
@@ -431,6 +383,8 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
 
             double direction = ARMath.getPOIDirection(mCurrentLocation.getLongitude(), mCurrentLocation.getLatitude(), -78.940278, 36.001901);
             double differenceX = ARMath.getRelativeAngleOfPOI(mCurrentOrientation[0], direction);
+            //System.out.println("Heading:" + mCurrentOrientation[0] + " POI Direction:" + direction + " Difference:" + differenceX);
+
             double fov_x = 45;
 
             //double directionHeight = ARMath.getPOIAltitude(mCurrentLocation.getAltitude(), 119);
@@ -452,27 +406,35 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
                 SizeF size = manager.get(CameraCharacteristics.SENSOR_INFO_PHYSICAL_SIZE);
                 float width = size.getWidth();
                 fov_x = Math.toDegrees(2*Math.atan(width/2/focalLength));
-
                 float height = size.getHeight();
                 fov_y = Math.toDegrees(2*Math.atan(height/2/focalLength));
             } catch (Exception e) {
                 e.printStackTrace();
             }
 
-            System.out.println(mCurrentOrientation[1]);
+            //System.out.println(mCurrentOrientation[1]);
 
-            if(differenceX/fov_x <= 1 && differenceY/fov_y <= 1) {
+            System.out.println("difference:" + differenceX + " fov_x:" + fov_x);
+
+            if(differenceX < fov_x/2 && differenceY < fov_y/2){
                 picture.setVisibility(View.VISIBLE);
-                if (ARMath.getSide(mCurrentOrientation[0], direction, fov_x) == 0) {
-                    picture.setX((float) (activityScreenSize.x*(0.5 + differenceX/fov_x/2) - picture.getWidth()/2));
-                } else {
-                    picture.setX((float) (activityScreenSize.x*(0.5 - differenceX/fov_x/2) - picture.getWidth()/2));
+
+                if((Math.abs(differenceX - previousDifferenceX) > 0.5)){
+                    previousDifferenceX = differenceX;
+                    if (ARMath.getSide(mCurrentOrientation[0], direction, fov_x) == 0) {
+                        picture.setX((float) (activityScreenSize.x*(0.5 + differenceX/fov_x) - picture.getWidth()/2));
+                    } else {
+                        picture.setX((float) (activityScreenSize.x*(0.5 - differenceX/fov_x) - picture.getWidth()/2));
+                    }
                 }
 
-                if (ARMath.getAboveBelow(mCurrentOrientation[1], absoluteHeightAngle) == 0) {
-                    picture.setY((float) (activityScreenSize.y*(0.5 + differenceY/fov_y/2) - picture.getHeight()/2));
-                } else {
-                    picture.setY((float) (activityScreenSize.y*(0.5 - differenceY/fov_y/2) - picture.getHeight()/2));
+                if(Math.abs(differenceY - previousDifferenceY) > 0.5) {
+                    previousDifferenceY = differenceY;
+                    if (ARMath.getAboveBelow(mCurrentOrientation[1], absoluteHeightAngle) == 0) {
+                        picture.setY((float) (activityScreenSize.y * (0.5 + differenceY / fov_y) - picture.getHeight() / 2));
+                    } else {
+                        picture.setY((float) (activityScreenSize.y * (0.5 - differenceY / fov_y) - picture.getHeight() / 2));
+                    }
                 }
             } else {
                 picture.setVisibility(View.INVISIBLE);
