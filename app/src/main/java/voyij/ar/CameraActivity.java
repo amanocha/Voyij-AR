@@ -88,11 +88,11 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
 
     private void createPoints() {
         points = new POI[5];
-        points[0] = new POI("Chapel", 36.001901, -78.940278);
-        points[1] = new POI("West Union",36.000798 ,-78.939011);
-        points[2] = new POI("Cameron",35.997592 ,-78.942173);
-        points[3] = new POI("Fuqua", 35.998843,-78.947274);
-        points[4] = new POI("LSRC",36.004361 ,-78.941871);
+        points[0] = new POI("Chapel", 36.001901, -78.940278, POI.TYPE_LANDMARK);
+        points[1] = new POI("West Union",36.000798 ,-78.939011, POI.TYPE_RESTAURANT);
+        points[2] = new POI("Cameron",35.997592 ,-78.942173, POI.TYPE_LANDMARK);
+        points[3] = new POI("Fuqua", 35.998843,-78.947274, POI.TYPE_LANDMARK);
+        points[4] = new POI("LSRC",36.004361 ,-78.941871, POI.TYPE_LANDMARK);
     }
     @Override
     protected void onCreate(Bundle savedInstanceState) {

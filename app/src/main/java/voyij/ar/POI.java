@@ -7,22 +7,29 @@ import java.util.List;
  */
 
 public class POI {
+    public static final String TYPE_STORE = "Store";
+    public static final String TYPE_RESTAURANT = "Restaurant";
+    public static final String TYPE_UTILITY = "Utility";
+    public static final String TYPE_LANDMARK = "Landmark";
+
     private String title;
     private double latitude;
     private double longitude;
+    private String POIType;
     private String description;
     private String imageSource;
     private String thumbnailSource;
     private List<String> couponsSource;
 
-    public POI(String title, double latitude, double longitude) {
-        this(title, latitude, longitude, null, null, null);
+    public POI(String title, double latitude, double longitude, String POIType) {
+        this(title, latitude, longitude, POIType, null, null, null);
     }
 
-    public POI(String title, double latitude, double longitude, String description, String imageSource, String thumbnailSource) {
+    public POI(String title, double latitude, double longitude, String POIType, String description, String imageSource, String thumbnailSource) {
         this.title = title;
         this.latitude = latitude;
         this.longitude = longitude;
+        this.POIType = POIType;
         this.description = description;
         this.imageSource = imageSource;
         this.thumbnailSource = thumbnailSource;
@@ -74,5 +81,18 @@ public class POI {
 
     public void setThumbnailSource(String thumbnailSource) {
         this.thumbnailSource = thumbnailSource;
+    }
+
+    public String getPOIType() {
+        return POIType;
+    }
+
+    public void setPOIType(String POIType) {
+        this.POIType = POIType;
+    }
+
+    @Override
+    public String toString() {
+        return title + " (" + POIType + ")";
     }
 }
