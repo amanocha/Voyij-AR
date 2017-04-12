@@ -1,21 +1,38 @@
 package voyij.ar;
 
+import java.util.List;
+
 /**
- * Created by samtoffler on 3/31/17.
+ * Created by Titan on 3/31/17.
  */
 
 public class POI {
+    public static final String TYPE_STORE = "Store";
+    public static final String TYPE_RESTAURANT = "Restaurant";
+    public static final String TYPE_UTILITY = "Utility";
+    public static final String TYPE_LANDMARK = "Landmark";
+
     private String title;
     private double latitude;
-    private double longtitude;
+    private double longitude;
+    private String POIType;
     private String description;
     private String imageSource;
     private String thumbnailSource;
+    private List<String> couponsSource;
 
-    public POI(String title, double latitude, double longtitude) {
+    public POI(String title, double latitude, double longitude, String POIType) {
+        this(title, latitude, longitude, POIType, null, null, null);
+    }
+
+    public POI(String title, double latitude, double longitude, String POIType, String description, String imageSource, String thumbnailSource) {
         this.title = title;
         this.latitude = latitude;
-        this.longtitude = longtitude;
+        this.longitude = longitude;
+        this.POIType = POIType;
+        this.description = description;
+        this.imageSource = imageSource;
+        this.thumbnailSource = thumbnailSource;
     }
 
     public String getTitle() {
@@ -34,12 +51,12 @@ public class POI {
         this.latitude = latitude;
     }
 
-    public double getLongtitude() {
-        return longtitude;
+    public double getLongitude() {
+        return longitude;
     }
 
-    public void setLongtitude(double longtitude) {
-        this.longtitude = longtitude;
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
     }
 
     public String getDescription() {
@@ -58,5 +75,24 @@ public class POI {
         this.imageSource = imageSource;
     }
 
+    public String getThumbnailSource() {
+        return thumbnailSource;
+    }
 
+    public void setThumbnailSource(String thumbnailSource) {
+        this.thumbnailSource = thumbnailSource;
+    }
+
+    public String getPOIType() {
+        return POIType;
+    }
+
+    public void setPOIType(String POIType) {
+        this.POIType = POIType;
+    }
+
+    @Override
+    public String toString() {
+        return title + " (" + POIType + ")";
+    }
 }

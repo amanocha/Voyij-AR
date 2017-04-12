@@ -3,6 +3,8 @@ package voyij.ar;
 import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Point;
@@ -87,18 +89,22 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
     private Point fullScreenSize;
     private POI[] points;
 
-    private double previous;
-
     private int SCREEN_WIDTH;
     private int SCREEN_HEIGHT;
+    private int POIRange;
+    private boolean showStores;
+    private boolean showRestaurants;
+    private boolean showUtilities;
+    private boolean showLandmarks;
+
 
     private void createPoints() {
         points = new POI[5];
-        points[0] = new POI("Chapel", 36.001901, -78.940278);
-        points[1] = new POI("West Union",36.000798 ,-78.939011);
-        points[2] = new POI("Cameron",35.997592 ,-78.942173);
-        points[3] = new POI("Fuqua", 35.998843,-78.947274);
-        points[4] = new POI("LSRC",36.004361 ,-78.941871);
+        points[0] = new POI("Chapel", 36.001901, -78.940278, POI.TYPE_LANDMARK);
+        points[1] = new POI("West Union",36.000798 ,-78.939011, POI.TYPE_RESTAURANT);
+        points[2] = new POI("Cameron",35.997592 ,-78.942173, POI.TYPE_LANDMARK);
+        points[3] = new POI("Fuqua", 35.998843,-78.947274, POI.TYPE_LANDMARK);
+        points[4] = new POI("LSRC",36.004361 ,-78.941871, POI.TYPE_LANDMARK);
     }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -182,8 +188,6 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         System.out.println("TV height:" + getWindow().getDecorView().getHeight());
         createPoints();
-
-        previous = 0;
     }
 
     protected void onStart() {
@@ -195,6 +199,38 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
     protected void onStop() {
         super.onStop();
         mLocationSensor.stop();
+    }
+
+    public void openSettingsActivity(View view) {
+        System.out.println("Opening Settings");
+        Intent intent = new Intent(this, SettingsActivity.class);
+        intent.putExtra(SettingsActivity.STATE_POI_RANGE, POIRange);
+        intent.putExtra(SettingsActivity.STATE_SHOW_STORES, showStores);
+        intent.putExtra(SettingsActivity.STATE_SHOW_RESTAURANTS, showRestaurants);
+        intent.putExtra(SettingsActivity.STATE_SHOW_UTILITIES, showUtilities);
+        intent.putExtra(SettingsActivity.STATE_SHOW_LANDMARKS, showLandmarks);
+        startActivityForResult(intent, SettingsActivity.SETTINGS_REQUEST);
+    }
+
+    private void restoreSettingsFromDisk() {
+        SharedPreferences prefs = getSharedPreferences(SettingsActivity.KEY_AR_PREFS, MODE_PRIVATE);
+        POIRange = prefs.getInt(SettingsActivity.STATE_POI_RANGE, 1000);
+        showStores = prefs.getBoolean(SettingsActivity.STATE_SHOW_STORES, true);
+        showRestaurants = prefs.getBoolean(SettingsActivity.STATE_SHOW_RESTAURANTS, true);
+        showUtilities = prefs.getBoolean(SettingsActivity.STATE_SHOW_UTILITIES, true);
+        showLandmarks = prefs.getBoolean(SettingsActivity.STATE_SHOW_LANDMARKS, true);
+        System.out.println("Restore Settings from Disk");
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == SettingsActivity.SETTINGS_REQUEST && resultCode == RESULT_OK && data != null) {
+            POIRange = data.getIntExtra(SettingsActivity.STATE_POI_RANGE, 1000);
+            showStores = data.getBooleanExtra(SettingsActivity.STATE_SHOW_STORES, true);
+            showRestaurants = data.getBooleanExtra(SettingsActivity.STATE_SHOW_RESTAURANTS, true);
+            showUtilities = data.getBooleanExtra(SettingsActivity.STATE_SHOW_UTILITIES, true);
+            showLandmarks = data.getBooleanExtra(SettingsActivity.STATE_SHOW_LANDMARKS, true);
+        }
     }
 
     TextureView.SurfaceTextureListener textureListener = new TextureView.SurfaceTextureListener() {
