@@ -40,12 +40,16 @@ public class ARMath {
         double direction = Math.toDegrees(Math.atan2(y, x));
 
         if (phoneLong == poiLong && phoneLat == poiLat) {
-            return -2;
+            return -1;
         } else {
-            if (direction > 0) {
-                return direction;
-            } else {
-                return direction + 360;
+            if (poiLat > phoneLat && poiLong >= phoneLong) { //quadrant I
+                return 90 - direction;
+            } else if (poiLat >= phoneLat && poiLong < phoneLong ) { //quadrant II
+                return 270 - direction;
+            } else if (poiLat < phoneLat && poiLong <= phoneLong) { //quadrant III
+                return Math.abs(direction) + 90;
+            } else { //quadrant IV (poiLat <= phoneLat && poiLong > phoneLong)
+                return Math.abs(direction) + 90;
             }
         }
     }
@@ -79,7 +83,11 @@ public class ARMath {
     }
 
     public static double getRelativeHeightAngle(double phoneAngle, double absoluteAngle){
-        return phoneAngle - absoluteAngle;
+        if (phoneAngle < 0) {
+            return -1*Math.abs(phoneAngle-absoluteAngle);
+        } else {
+            return Math.abs(phoneAngle-absoluteAngle);
+        }
     }
 
     public static double getRelativeAngleOfPOI(double phoneAngle, double poiAbsoluteAngle){
