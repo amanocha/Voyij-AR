@@ -78,6 +78,7 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
     private Point activityScreenSize;
     private Point fullScreenSize;
     private POI[] points;
+    private ImageView[] images;
 
     private int POIRange;
     private boolean showStores;
@@ -87,19 +88,27 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
 
 
     private void createPoints() {
-        points = new POI[5];
+        points = new POI[1];
         points[0] = new POI("Chapel", 36.001901, -78.940278);
-        points[1] = new POI("West Union",36.000798 ,-78.939011);
-        points[2] = new POI("Cameron",35.997592 ,-78.942173);
-        points[3] = new POI("Fuqua", 35.998843,-78.947274);
-        points[4] = new POI("LSRC",36.004361 ,-78.941871);
+//        points[1] = new POI("West Union",36.000798 ,-78.939011);
+//        points[2] = new POI("Cameron",35.997592 ,-78.942173);
+//        points[3] = new POI("Fuqua", 35.998843,-78.947274);
+//        points[4] = new POI("LSRC",36.004361 ,-78.941871);
+    }
+
+    private void createImages(){
+        images = new ImageView[1];
+        for(int i = 0; i < 1; i++){
+            ImageView iv = (ImageView) findViewById(R.id.imageView1);
+            images[i] = iv;
+        }
     }
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_camera);
-        picture = (ImageView) findViewById(R.id.imageView1);
+        //picture = (ImageView) findViewById(R.id.imageView1);
 
         Display display = getWindowManager().getDefaultDisplay();
         fullScreenSize = new Point();
@@ -108,11 +117,8 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
         display.getSize(activityScreenSize);
         bottomBarHeight = fullScreenSize.y - activityScreenSize.y;
 
-//        picture.setX(fullScreenSize.x/2);
-//        picture.setY(fullScreenSize.y/2 - bottomBarHeight);
-
-
         SensorManager mSensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
+
         // If the phone doesn't have sensors, exit the app (or do something else)
         if(mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) == null ||
                 mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD) == null){
@@ -146,6 +152,9 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
         //setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         System.out.println("TV height:" + getWindow().getDecorView().getHeight());
         createPoints();
+        createImages();
+        images[0].setX(fullScreenSize.x/2);
+        images[0].setY(fullScreenSize.y/2 - bottomBarHeight);
         restoreSettingsFromDisk();
     }
 
@@ -359,7 +368,7 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
         System.out.println("Accuracy changed: " + sensor.getName()+ ": " + accuracy);
     }
 
-    final float alpha = 0.2f;
+    final float alpha = 0.05f;
 
     protected float[] lowPass(float[] input, float[] output) {
         if (output == null) return input;
@@ -395,10 +404,13 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
                 //System.out.println("Azimuth:" + orientation[0] + " Pitch:" + orientation[1] + " Roll:" + orientation[2]);
 
                 mCurrentOrientation = orientation;
-                doMath();
+                for(int i = 0; i < points.length; i++){
+                    doMath(i);
+                }
             }
         }
     }
+
 
     private float normalize(double value) {
         if (value < 0) {
@@ -412,12 +424,14 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
     public void onLocationChanged(Location location) {
         Toast.makeText(this, "Location Changed", Toast.LENGTH_SHORT).show();
         mCurrentLocation = location;
-        doMath();
+        for(int i = 0; i < points.length; i++){
+            doMath(i);
+        }
     }
 
-    double previousDifferenceX = 0;
-    double previousDifferenceY = 0;
-    public void doMath(){
+    //double previousDifferenceX = 0;
+    //double previousDifferenceY = 0;
+    public void doMath(int i){
         if(mCurrentLocation != null){
             //Toast.makeText(this, Double.toString(ARMath.getAbsoluteAngleOfPOI(mCurrentLocation.getLongitude(), mCurrentLocation.getLatitude(), -78.940278, 36.001901)), Toast.LENGTH_SHORT).show();
 
@@ -425,15 +439,16 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
 //            Double relativeAngle = ARMath.getRelativeAngleOfPOI(mCurrentOrientation[0], absoluteAngle);
             //System.out.println("Absolute angle: " + Double.toString(absoluteAngle));
 
-            double direction = ARMath.getPOIDirection(mCurrentLocation.getLongitude(), mCurrentLocation.getLatitude(), -78.940278, 36.001901);
+            double direction = ARMath.getPOIDirection(mCurrentLocation.getLongitude(), mCurrentLocation.getLatitude(), points[i].getLongitude(), points[i].getLatitude());
             double differenceX = ARMath.getRelativeAngleOfPOI(mCurrentOrientation[0], direction);
             //System.out.println("Heading:" + mCurrentOrientation[0] + " POI Direction:" + direction + " Difference:" + differenceX);
 
             double fov_x = 45;
 
             //double directionHeight = ARMath.getPOIAltitude(mCurrentLocation.getAltitude(), 119);
-            double distance = ARMath.getPOIDistance(mCurrentLocation.getLongitude(), mCurrentLocation.getLatitude(), -78.940278, 36.001901);
+            double distance = ARMath.getPOIDistance(mCurrentLocation.getLongitude(), mCurrentLocation.getLatitude(), points[i].getLongitude(), points[i].getLatitude());
             double heightDifference = ARMath.getHeightDifference(0, 0);
+            //System.out.println("Distance" + distance);
 
             double absoluteHeightAngle = ARMath.getAbsoluteHeightAngle(distance, heightDifference);
             //System.out.println("absolute: " + Math.toDegrees(absoluteHeightAngle));
@@ -458,30 +473,45 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
 
             //System.out.println(mCurrentOrientation[1]);
 
-            System.out.println("difference:" + differenceX + " fov_x:" + fov_x);
+            System.out.println("differenceX:" + differenceX + " differenceY:" + differenceY);
 
             if(differenceX < fov_x/2 && differenceY < fov_y/2){
-                picture.setVisibility(View.VISIBLE);
+                images[i].setVisibility(View.VISIBLE);
+                System.out.println("here");
 
-                if((Math.abs(differenceX - previousDifferenceX) > 0.5)){
-                    previousDifferenceX = differenceX;
-                    if (ARMath.getSide(mCurrentOrientation[0], direction, fov_x) == 0) {
-                        picture.setX((float) (activityScreenSize.x*(0.5 + differenceX/fov_x) - picture.getWidth()/2));
-                    } else {
-                        picture.setX((float) (activityScreenSize.x*(0.5 - differenceX/fov_x) - picture.getWidth()/2));
-                    }
+//                if((Math.abs(differenceX - previousDifferenceX) > 0.5)){
+//                    previousDifferenceX = differenceX;
+//                    if (ARMath.getSide(mCurrentOrientation[0], direction, fov_x) == 0) {
+//                        images[i].setX((float) (activityScreenSize.x*(0.5 + differenceX/fov_x) - images[i].getWidth()/2));
+//                    } else {
+//                        images[i].setX((float) (activityScreenSize.x*(0.5 - differenceX/fov_x) - images[i].getWidth()/2));
+//                    }
+//                }
+//
+//                if(Math.abs(differenceY - previousDifferenceY) > 0.5) {
+//                    previousDifferenceY = differenceY;
+//                    if (ARMath.getSide(mCurrentOrientation[0], direction, fov_x) == 0) {
+//                        images[i].setX((float) (activityScreenSize.x*(0.5 + differenceX/fov_x) - images[i].getWidth()/2));
+//                    } else {
+//                        images[i].setX((float) (activityScreenSize.x*(0.5 - differenceX/fov_x) - images[i].getWidth()/2));
+//                    }
+//                }
+
+
+                if (ARMath.getSide(mCurrentOrientation[0], direction, fov_x) == 0) {
+                    images[i].setX((float) (activityScreenSize.x*(0.5 + differenceX/fov_x) - images[i].getWidth()/2));
+                } else {
+                    images[i].setX((float) (activityScreenSize.x*(0.5 - differenceX/fov_x) - images[i].getWidth()/2));
                 }
 
-                if(Math.abs(differenceY - previousDifferenceY) > 0.5) {
-                    previousDifferenceY = differenceY;
-                    if (ARMath.getAboveBelow(mCurrentOrientation[1], absoluteHeightAngle) == 0) {
-                        picture.setY((float) (activityScreenSize.y * (0.5 + differenceY / fov_y) - picture.getHeight() / 2));
-                    } else {
-                        picture.setY((float) (activityScreenSize.y * (0.5 - differenceY / fov_y) - picture.getHeight() / 2));
-                    }
+
+                if (ARMath.getAboveBelow(mCurrentOrientation[1], differenceY) == 0) {
+                    images[i].setY((float) (activityScreenSize.y*(0.5 + differenceY/fov_y) - images[i].getWidth()/2));
+                } else {
+                    images[i].setY((float) (activityScreenSize.y*(0.5 - differenceY/fov_y) - images[i].getWidth()/2));
                 }
             } else {
-                picture.setVisibility(View.INVISIBLE);
+                images[i].setVisibility(View.INVISIBLE);
             }
         }
     }
