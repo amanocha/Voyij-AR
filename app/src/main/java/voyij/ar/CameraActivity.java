@@ -43,6 +43,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.FrameLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
@@ -52,6 +53,7 @@ import com.google.android.gms.phenotype.Configuration;
 
 public class CameraActivity extends AppCompatActivity implements SensorEventListener, LocationListener {
 
+    // Camera Variables
     private String cameraId;
     private static final String TAG = "AndroidCameraApi";
     protected CameraDevice cameraDevice;
@@ -66,62 +68,116 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
     private File file;
     private CameraManager cameraManager;
 
+    // Sensor Variables
     private SensorManager mSensorManager;
     private Sensor rotationSensor;
     private float[] mRotationMatrix;
     private float[] mOrientation;
     private float[] mRotationMatrix2;
     private float[] mOrientation2;
-
-    private float[] mGravity;
-    private float[] mGeomagnetic;
     private float[] mAngles;
-
     private Compass mCompassSensor;
     private LocationGPS mLocationSensor;
-
     private Location mCurrentLocation;
     private float[] mCurrentOrientation;
 
-    ImageView picture;
+    // Screen Variables
     int bottomBarHeight;
     private Point activityScreenSize;
     private Point fullScreenSize;
+
+    // POI Variables
     private POI[] points;
     private ImageView[] images;
-
-    private int SCREEN_WIDTH;
-    private int SCREEN_HEIGHT;
+    private TextView[] texts;
     private int POIRange;
     private boolean showStores;
     private boolean showRestaurants;
     private boolean showUtilities;
     private boolean showLandmarks;
 
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_camera);
+
+        getScreenInfo();
+
+        mSensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
+        rotationSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
+
+        checkPermissions();
+        initializeSensors();
+        initializeTextureView();
+        createPoints();
+        //createImages();
+        createTexts();
+    }
 
     private void createPoints() {
         points = new POI[5];
         points[0] = new POI("Chapel", 36.001901, -78.940278, POI.TYPE_LANDMARK);
         points[1] = new POI("West Union",36.000798 ,-78.939011, POI.TYPE_RESTAURANT);
-        points[2] = new POI("Cameron",35.997592 ,-78.942173, POI.TYPE_LANDMARK);
-        points[3] = new POI("Fuqua", 35.998843,-78.947274, POI.TYPE_LANDMARK);
-        points[4] = new POI("LSRC",36.004361 ,-78.941871, POI.TYPE_LANDMARK);
+        points[2] = new POI("Cameron", 35.997592 , -78.942173, POI.TYPE_LANDMARK);
+        points[3] = new POI("Fuqua", 35.998843, -78.947274, POI.TYPE_LANDMARK);
+        points[4] = new POI("LSRC", 36.004361 , -78.941871, POI.TYPE_LANDMARK);
     }
 
-    private void createImages(){
-        images = new ImageView[1];
-        for(int i = 0; i < 1; i++){
-            ImageView iv = (ImageView) findViewById(R.id.imageView1);
-            images[i] = iv;
+    private void createTexts(){
+        texts = new TextView[5];
+
+        TextView tv1 = (TextView) findViewById(R.id.textView1);
+        TextView tv2 = (TextView) findViewById(R.id.textView2);
+        TextView tv3 = (TextView) findViewById(R.id.textView3);
+        TextView tv4 = (TextView) findViewById(R.id.textView4);
+        TextView tv5 = (TextView) findViewById(R.id.textView5);
+
+        texts[0] = tv1;
+        texts[1] = tv2;
+        texts[2] = tv3;
+        texts[3] = tv4;
+        texts[4] = tv5;
+
+    }
+
+//    private void createImages(){
+//        images = new ImageView[5];
+//
+//        ImageView iv1 = (ImageView) findViewById(R.id.imageView1);
+//        ImageView iv2 = (ImageView) findViewById(R.id.imageView2);
+//        ImageView iv3 = (ImageView) findViewById(R.id.imageView3);
+//        ImageView iv4 = (ImageView) findViewById(R.id.imageView4);
+//        ImageView iv5 = (ImageView) findViewById(R.id.imageView5);
+//
+//        images[0] = iv1;
+//        images[1] = iv2;
+//        images[2] = iv3;
+//        images[3] = iv4;
+//        images[4] = iv5;
+////        for(int i = 0; i < 5; i++){
+////            ImageView iv = new ImageView(this);
+////            iv.setImageResource(R.drawable.building);
+////            images[i] = iv;
+////        }
+//    }
+
+    private double fov_x;
+    private double fov_y;
+    private void getCameraInfo(){
+        try {
+            CameraCharacteristics manager = cameraManager.getCameraCharacteristics(cameraId);
+            float focalLength = manager.get(CameraCharacteristics.LENS_INFO_AVAILABLE_FOCAL_LENGTHS)[0];
+            SizeF size = manager.get(CameraCharacteristics.SENSOR_INFO_PHYSICAL_SIZE);
+            float width = size.getWidth();
+            fov_x = Math.toDegrees(2*Math.atan(width/2/focalLength));
+            float height = size.getHeight();
+            fov_y = Math.toDegrees(2*Math.atan(height/2/focalLength));
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
-    
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_camera);
-        //picture = (ImageView) findViewById(R.id.imageView1);
 
+    private void getScreenInfo(){
         Display display = getWindowManager().getDefaultDisplay();
         fullScreenSize = new Point();
         display.getRealSize(fullScreenSize);
@@ -138,39 +194,28 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
         if (getTheme().resolveAttribute(android.R.attr.actionBarSize, tv, true)) {
             actionBarHeight = TypedValue.complexToDimensionPixelSize(tv.data,getResources().getDisplayMetrics());
         }
+    }
 
-        SCREEN_HEIGHT = fullScreenSize.y - actionBarHeight;
-
-        //SCREEN_HEIGHT = this.findViewById(android.R.id.content).getHeight();
-
-//        picture.setX(fullScreenSize.x/2);
-//        picture.setY(fullScreenSize.y/2 - bottomBarHeight);
-
-
-        mSensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
-        rotationSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
-
+    private void checkPermissions(){
         // If the phone doesn't have sensors, exit the app (or do something else)
-        if(mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) == null ||
-                mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD) == null ||
-                mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR) == null) {
+        if(mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR) == null) {
             // Check to see if this actually works
             this.finish();
             return;
         }
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
+            // ActivityCompat#requestPermissions here to request the missing permissions, and then overriding
+            // public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation for
+            // ActivityCompat#requestPermissions for more details.
             ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 1);
             System.out.println("FAILED");
 //            return;
         }
+    }
 
+    private void initializeSensors(){
         mCompassSensor = new Compass(mSensorManager);
         mLocationSensor = new LocationGPS(this, this);
         mCurrentOrientation = new float[3];
@@ -189,16 +234,14 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
         mRotationMatrix2[12] = 1;
         mOrientation2 = new float[9];
 
-        mGravity = new float[3];
-        mGeomagnetic = new float[3];
         mAngles = new float[5];
+    }
 
+    private void initializeTextureView(){
         textureView = (TextureView) findViewById(R.id.texture);
         assert textureView != null;
         textureView.setSurfaceTextureListener(textureListener);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        System.out.println("TV height:" + getWindow().getDecorView().getHeight());
-        createPoints();
     }
 
     protected void onStart() {
@@ -210,6 +253,45 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
     protected void onStop() {
         super.onStop();
         mLocationSensor.stop();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.e(TAG, "onResume");
+        startBackgroundThread();
+        if (textureView.isAvailable()) {
+            openCamera();
+        } else {
+            textureView.setSurfaceTextureListener(textureListener);
+        }
+        mCompassSensor.registerLocationListener(this);
+    }
+
+    @Override
+    protected void onPause() {
+        Log.e(TAG, "onPause");
+        closeCamera();
+        stopBackgroundThread();
+        super.onPause();
+        mCompassSensor.unregisterLocationListener(this);
+    }
+
+    protected void startBackgroundThread() {
+        mBackgroundThread = new HandlerThread("Camera Background");
+        mBackgroundThread.start();
+        mBackgroundHandler = new Handler(mBackgroundThread.getLooper());
+    }
+
+    protected void stopBackgroundThread() {
+        mBackgroundThread.quitSafely();
+        try {
+            mBackgroundThread.join();
+            mBackgroundThread = null;
+            mBackgroundHandler = null;
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     public void openSettingsActivity(View view) {
@@ -244,6 +326,114 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
         }
     }
 
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+        // Do we need to add stuff here?
+    }
+
+    final float alpha = 0.15f;
+    protected float[] lowPass(float[] input, float[] output) {
+        if (output == null) return input;
+        for (int i=0; i<input.length; i++) {
+            output[i] = input[i] + alpha * (input[i] - output[i]);
+        }
+        return output;
+    }
+
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+        if (event.sensor.getType() == Sensor.TYPE_ROTATION_VECTOR) {
+            mAngles = lowPass(event.values, mAngles);
+
+            // Part 1 - used for Y axis calculations
+            SensorManager.getRotationMatrixFromVector(mRotationMatrix, mAngles);
+            SensorManager.remapCoordinateSystem(mRotationMatrix, SensorManager.AXIS_X, SensorManager.AXIS_Z, mRotationMatrix);
+            SensorManager.getOrientation(mRotationMatrix, mOrientation);
+            mOrientation[0] = ARMath.normalize(Math.round(Math.toDegrees(mOrientation[0])));
+            mOrientation[1] = (float) Math.round(Math.toDegrees(mOrientation[1]));
+            mOrientation[2] = ARMath.normalize(Math.round(Math.toDegrees(mOrientation[2])));
+
+            // Part 2 - used for X axis calculations
+            SensorManager.getRotationMatrixFromVector(mRotationMatrix2, mAngles);
+            SensorManager.remapCoordinateSystem(mRotationMatrix2, SensorManager.AXIS_Y, SensorManager.AXIS_MINUS_X, mRotationMatrix2);
+            SensorManager.getOrientation(mRotationMatrix2, mOrientation2);
+            mOrientation2[0] = ARMath.normalize(Math.round(Math.toDegrees(mOrientation2[0])));
+            mOrientation2[1] = (float) Math.round(Math.toDegrees(mOrientation2[1]));
+            mOrientation2[2] = ARMath.normalize(Math.round(Math.toDegrees(mOrientation2[2])));
+
+
+            mCurrentOrientation[0] = ARMath.normalize(mOrientation2[0] - 90);
+            mCurrentOrientation[1] = mOrientation[1];
+
+            for (int i = 0; i < points.length; i++) {
+                doMath(i);
+            }
+        }
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        mCurrentLocation = location;
+        for (int i = 0; i < points.length; i++) {
+            doMath(i);
+        }
+    }
+
+    public void doMath(int i){
+        if(mCurrentLocation != null){
+            // X Calculations
+            double direction = ARMath.getPOIDirection(mCurrentLocation.getLongitude(), mCurrentLocation.getLatitude(), points[i].getLongitude(), points[i].getLatitude());
+            double differenceX = ARMath.getRelativeAngleOfPOI(mCurrentOrientation[0], direction);
+
+            // Y Calculations
+            double distance = ARMath.getPOIDistance(mCurrentLocation.getLongitude(), mCurrentLocation.getLatitude(), points[i].getLongitude(), points[i].getLatitude());
+            double heightDifference = ARMath.getHeightDifference(0, 0);
+            double absoluteHeightAngle = ARMath.getAbsoluteHeightAngle(distance, heightDifference);
+            double differenceY = ARMath.getRelativeHeightAngle(mCurrentOrientation[1], absoluteHeightAngle);
+
+//            Add ImageViews
+//            if(differenceX/fov_x <= 1 && differenceY/fov_y <= 1) {
+//                images[i].setVisibility(View.VISIBLE);
+//                if (ARMath.getSide(mCurrentOrientation[0], direction, fov_x) == 0) {
+//                    images[i].setX((float) (activityScreenSize.x*(0.5 + differenceX/fov_x/2) - images[i].getWidth()/2));
+//                } else {
+//                    images[i].setX((float) (activityScreenSize.x*(0.5 - differenceX/fov_x/2) - images[i].getWidth()/2));
+//                }
+//
+//                if (ARMath.getAboveBelow(mCurrentOrientation[1], absoluteHeightAngle) == 0) {
+//                    images[i].setY((float) (activityScreenSize.y*(0.5 + differenceY/fov_y/2) - images[i].getHeight()/2));
+//                } else {
+//                    images[i].setY((float) (activityScreenSize.y*(0.5 - differenceY/fov_y/2) - images[i].getHeight()/2));
+//                }
+//                System.out.println(points[i].getTitle() + ": " + images[i].getX() + " " + images[i].getY());
+//            } else {
+//                images[i].setVisibility(View.INVISIBLE);
+//            }
+
+            // Add TextViews
+            if(differenceX/fov_x <= 1 && differenceY/fov_y <= 1) {
+                texts[i].setVisibility(View.VISIBLE);
+                if (ARMath.getSide(mCurrentOrientation[0], direction, fov_x) == 0) {
+                    texts[i].setX((float) (activityScreenSize.x*(0.5 + differenceX/45) - texts[i].getWidth()/2));
+                } else {
+                    texts[i].setX((float) (activityScreenSize.x*(0.5 - differenceX/45) - texts[i].getWidth()/2));
+                }
+
+                if (ARMath.getAboveBelow(mCurrentOrientation[1], absoluteHeightAngle) == 0) {
+                    texts[i].setY((float) (activityScreenSize.y*(0.5 + differenceY/fov_y/2) - texts[i].getHeight()/2) + i*50);
+                } else {
+                    texts[i].setY((float) (activityScreenSize.y*(0.5 - differenceY/fov_y/2) - texts[i].getHeight()/2) + i*50);
+                }
+
+            } else {
+                texts[i].setVisibility(View.INVISIBLE);
+            }
+        }
+    }
+
+
+
+    // HERE BE CAMERA STUFF
     TextureView.SurfaceTextureListener textureListener = new TextureView.SurfaceTextureListener() {
         @Override
         public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
@@ -270,6 +460,7 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
             Log.e(TAG, "onOpened");
             cameraDevice = camera;
             createCameraPreview();
+            getCameraInfo();
         }
         @Override
         public void onDisconnected(CameraDevice camera) {
@@ -282,22 +473,7 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
         }
     };
 
-    protected void startBackgroundThread() {
-        mBackgroundThread = new HandlerThread("Camera Background");
-        mBackgroundThread.start();
-        mBackgroundHandler = new Handler(mBackgroundThread.getLooper());
-    }
 
-    protected void stopBackgroundThread() {
-        mBackgroundThread.quitSafely();
-        try {
-            mBackgroundThread.join();
-            mBackgroundThread = null;
-            mBackgroundHandler = null;
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
 
     protected void createCameraPreview() {
         try {
@@ -379,217 +555,6 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
                 // close the app
                 Toast.makeText(CameraActivity.this, "Sorry!!!, you can't use this app without granting permission", Toast.LENGTH_LONG).show();
                 finish();
-            }
-        }
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        Log.e(TAG, "onResume");
-        startBackgroundThread();
-        if (textureView.isAvailable()) {
-            openCamera();
-        } else {
-            textureView.setSurfaceTextureListener(textureListener);
-        }
-        mCompassSensor.registerLocationListener(this);
-    }
-
-    @Override
-    protected void onPause() {
-        Log.e(TAG, "onPause");
-        closeCamera();
-        stopBackgroundThread();
-        super.onPause();
-        mCompassSensor.unregisterLocationListener(this);
-    }
-
-    // Compass changes
-    @Override
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {
-        System.out.println("Accuracy changed: " + sensor.getName()+ ": " + accuracy);
-    }
-
-    final float alpha = 0.5f;
-    protected float[] lowPass(float[] input, float[] output) {
-        if (output == null) return input;
-        for (int i=0; i<input.length; i++) {
-            output[i] = input[i] + alpha * (input[i] - output[i]);
-        }
-        return output;
-    }
-
-    @Override
-    public void onSensorChanged(SensorEvent event) {
-        if (event.sensor.getType() == Sensor.TYPE_ROTATION_VECTOR) {
-
-            mAngles = lowPass(event.values, mAngles);
-
-            SensorManager.getRotationMatrixFromVector(mRotationMatrix, mAngles);
-            SensorManager.remapCoordinateSystem(mRotationMatrix, SensorManager.AXIS_X, SensorManager.AXIS_Z, mRotationMatrix);
-            SensorManager.getOrientation(mRotationMatrix, mOrientation);
-
-            //mOrientation[0] = normalize(Math.round(Math.toDegrees(mOrientation[0])));
-            mOrientation[1] = (float) Math.round(Math.toDegrees(mOrientation[1]));
-            //mOrientation[2] = normalize(Math.round(Math.toDegrees(mOrientation[2])));
-
-            SensorManager.getRotationMatrixFromVector(mRotationMatrix2, mAngles);
-            SensorManager.remapCoordinateSystem(mRotationMatrix2, SensorManager.AXIS_Y, SensorManager.AXIS_MINUS_X, mRotationMatrix2);
-            SensorManager.getOrientation(mRotationMatrix2, mOrientation2);
-
-            mOrientation2[0] = normalize(Math.round(Math.toDegrees(mOrientation2[0])));
-            mOrientation2[2] = normalize(Math.round(Math.toDegrees(mOrientation2[2])));
-
-
-            mCurrentOrientation[0] = mOrientation2[0] - 90;
-            mCurrentOrientation[1] = mOrientation[1];
-
-            //System.out.println((mOrientation2[0]-90) + " " + mOrientation[1] + " " + mOrientation2[2]);
-            for (int i = 0; i < points.length; i++) {
-                doMath(i);
-            }
-        }
-    }
-
-    /*@Override
-    public void onSensorChanged(SensorEvent event) {
-        // final float alpha = 0.97f;
-
->>>>>>> 2c6ebf41591ad4116aefeba78c733e5cab5fe5a1
-        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-            mGravity = lowPass(event.values.clone(), mGravity);
-        }
-
-        if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
-            mGeomagnetic = lowPass(event.values.clone(), mGeomagnetic);
-        }
-
-        if (mGravity != null && mGeomagnetic != null) {
-            float R[] = new float[9];
-            float I[] = new float[9];
-            SensorManager.getRotationMatrix(R, I, mGravity, mGeomagnetic);
-            boolean success = SensorManager.remapCoordinateSystem(R, SensorManager.AXIS_X, SensorManager.AXIS_Z, R);
-
-            if (success) {
-                float orientation[] = new float[3];
-                SensorManager.getOrientation(R, orientation);
-
-                orientation[0] = normalize(Math.toDegrees(orientation[0])); //azimuth
-                orientation[1] = (float) Math.toDegrees(orientation[1]); //pitch
-                orientation[2] = normalize(Math.toDegrees(orientation[2])); //roll
-                //System.out.println("Azimuth:" + orientation[0] + " Pitch:" + orientation[1] + " Roll:" + orientation[2]);
-
-                mCurrentOrientation = orientation;
-                for(int i = 0; i < points.length; i++){
-                    doMath(i);
-                }
-            }
-        }
-    }
-
-<<<<<<< HEAD
-=======
-//            float R[] = new float[9];
-//            float I[] = new float[9];
-//            boolean success = SensorManager.getRotationMatrix(R, I, mGravity, mGeomagnetic);
-//
-//            if (success) {
-//                float orientation[] = new float[3];
-//                SensorManager.getOrientation(R, orientation);
-//
-//                float azimuth = normalize(Math.toDegrees(orientation[0])); // orientation contains: azimuth, pitch and roll
-//                float pitch = normalize(Math.toDegrees(orientation[1]));
-//                float roll = normalize(Math.toDegrees(orientation[2]));
-//
-//                //orientation[0] = azimuth;
-//                System.out.println(azimuth);
-//
-//                orientation[0] = Math.round(azimuth); //Angle between device's current compass direction and magnetic north
-//                orientation[1] = Math.round(pitch); //Angle between a plane parallel to device's screen and a plane parallel to ground
-//                orientation[2] = Math.round(roll); //Angle between a plane perpendicular to device's screen and a plane perpendicular to ground
-//
-//                //System.out.println("Compass heading: " + orientation[0]);
-//                //System.out.println(Double.toString(azimuth) + " " + Double.toString(pitch) + " " + Double.toString(roll));
-//                mCurrentOrientation = orientation;
-//                doMath();
-//            }
-    }*/
-
-    private float normalize(double value) {
-        if (value < 0) {
-            return (360 + (float)value);
-        } else {
-            return (float)value;
-        }
-    }
-
-    @Override
-    public void onLocationChanged(Location location) {
-        Toast.makeText(this, "Location Changed", Toast.LENGTH_SHORT).show();
-        mCurrentLocation = location;
-        for (int i = 0; i < points.length; i++) {
-            doMath(i);
-        }
-    }
-
-    //double previousDifferenceX = 0;
-    //double previousDifferenceY = 0;
-    public void doMath(int i){
-        if(mCurrentLocation != null){
-            //Toast.makeText(this, Double.toString(ARMath.getAbsoluteAngleOfPOI(mCurrentLocation.getLongitude(), mCurrentLocation.getLatitude(), -78.940278, 36.001901)), Toast.LENGTH_SHORT).show();
-
-//            Double absoluteAngle = ARMath.getAbsoluteAngleOfPOI(mCurrentLocation.getLongitude(), mCurrentLocation.getLatitude(), -78.940278, 36.001901);
-//            Double relativeAngle = ARMath.getRelativeAngleOfPOI(mCurrentOrientation[0], absoluteAngle);
-            //System.out.println("Absolute angle: " + Double.toString(absoluteAngle));
-
-            double direction = ARMath.getPOIDirection(mCurrentLocation.getLongitude(), mCurrentLocation.getLatitude(), points[i].getLongitude(), points[i].getLatitude());
-            double differenceX = ARMath.getRelativeAngleOfPOI(mCurrentOrientation[0], direction);
-            //System.out.println("Heading:" + mCurrentOrientation[0] + " POI Direction:" + direction + " Difference:" + differenceX);
-
-            double fov_x = 45;
-
-            //double directionHeight = ARMath.getPOIAltitude(mCurrentLocation.getAltitude(), 119);
-            double distance = ARMath.getPOIDistance(mCurrentLocation.getLongitude(), mCurrentLocation.getLatitude(), points[i].getLongitude(), points[i].getLatitude());
-            double heightDifference = ARMath.getHeightDifference(0, 0);
-            //System.out.println("Distance" + distance);
-
-            double absoluteHeightAngle = ARMath.getAbsoluteHeightAngle(distance, heightDifference);
-            //System.out.println("absolute: " + Math.toDegrees(absoluteHeightAngle));
-            double differenceY = ARMath.getRelativeHeightAngle(mCurrentOrientation[1], absoluteHeightAngle);
-//            System.out.println("pitch: " + mCurrentOrientation[1]);
-//            System.out.println("relative: " + relativeHeightAngle);
-            //System.out.println("Relative Angle: " + relativeHeightAngle);
-            //double differenceHeight = ARMath.getRelativeAltitudeOfPOI(mCurrentOrientation[1], 0.0);
-            double fov_y = 90;
-
-            try {
-                CameraCharacteristics manager = cameraManager.getCameraCharacteristics(cameraId);
-                float focalLength = manager.get(CameraCharacteristics.LENS_INFO_AVAILABLE_FOCAL_LENGTHS)[0];
-                SizeF size = manager.get(CameraCharacteristics.SENSOR_INFO_PHYSICAL_SIZE);
-                float width = size.getWidth();
-                fov_x = Math.toDegrees(2*Math.atan(width/2/focalLength));
-                float height = size.getHeight();
-                fov_y = Math.toDegrees(2*Math.atan(height/2/focalLength));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            if(differenceX/fov_x <= 1 && differenceY/fov_y <= 1) {
-                picture.setVisibility(View.VISIBLE);
-                if (ARMath.getSide(mCurrentOrientation[0], direction, fov_x) == 0) {
-                    images[i].setX((float) (activityScreenSize.x*(0.5 + differenceX/fov_x) - images[i].getWidth()/2));
-                } else {
-                    images[i].setX((float) (activityScreenSize.x*(0.5 - differenceX/fov_x) - images[i].getWidth()/2));
-                }
-
-                if (ARMath.getAboveBelow(mCurrentOrientation[1], absoluteHeightAngle) == 0) {
-                    picture.setY((float) (SCREEN_HEIGHT*(0.5 + differenceY/fov_y/2) - picture.getHeight()/2));
-                } else {
-                    picture.setY((float) (SCREEN_HEIGHT*(0.5 - differenceY/fov_y/2) - picture.getHeight()/2));
-                }
-            } else {
-                images[i].setVisibility(View.INVISIBLE);
             }
         }
     }

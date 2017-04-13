@@ -11,11 +11,67 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"/>
 
-    <ImageView
-        android:id="@+id/imageView1"
-        android:src="@mipmap/ic_launcher"
-        android:layout_width="100dp"
-        android:layout_height="100dp" />
+    <!--<ImageView-->
+        <!--android:id="@+id/imageView1"-->
+        <!--android:src="@mipmap/ic_launcher"-->
+        <!--android:layout_width="100dp"-->
+        <!--android:layout_height="100dp" />-->
+    <!--<ImageView-->
+        <!--android:id="@+id/imageView2"-->
+        <!--android:src="@mipmap/ic_launcher"-->
+        <!--android:layout_width="100dp"-->
+        <!--android:layout_height="100dp" />-->
+    <!--<ImageView-->
+        <!--android:id="@+id/imageView3"-->
+        <!--android:src="@mipmap/ic_launcher"-->
+        <!--android:layout_width="100dp"-->
+        <!--android:layout_height="100dp" />-->
+    <!--<ImageView-->
+        <!--android:id="@+id/imageView4"-->
+        <!--android:src="@mipmap/ic_launcher"-->
+        <!--android:layout_width="100dp"-->
+        <!--android:layout_height="100dp" />-->
+    <!--<ImageView-->
+        <!--android:id="@+id/imageView5"-->
+        <!--android:src="@mipmap/ic_launcher"-->
+        <!--android:layout_width="100dp"-->
+        <!--android:layout_height="100dp" />-->
+
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Chapel"
+        android:textColor="#FFFFFF"
+        android:textSize="20sp" />
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="West Union"
+        android:textColor="#FFFFFF"
+        android:textSize="20sp" />
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Cameron"
+        android:textColor="#FFFFFF"
+        android:textSize="20sp" />
+    <TextView
+        android:id="@+id/textView4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Fuqua"
+        android:textColor="#FFFFFF"
+        android:textSize="20sp" />
+    <TextView
+        android:id="@+id/textView5"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="LSRC"
+        android:textColor="#FFFFFF"
+        android:textSize="20sp" />
 
     <Button
         android:id="@+id/buttonSettings"

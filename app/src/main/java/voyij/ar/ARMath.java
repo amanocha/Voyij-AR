@@ -6,38 +6,11 @@ package voyij.ar;
 
 public class ARMath {
 
-    public static final float PI = (float) 3.14159265359;
-
-    public static double getAbsoluteAngleOfPOI(double phoneLong, double phoneLat, double poiLong, double poiLat){
-        if(phoneLong > poiLong && phoneLat < poiLat){
-            return 360 - Math.toDegrees(Math.atan((phoneLong-poiLong)/(poiLat-phoneLat)));
-        } else if (phoneLong < poiLong && phoneLat < poiLat){
-            return Math.toDegrees(Math.atan((poiLong-phoneLong)/(poiLat-phoneLat)));
-        } else if (phoneLong > poiLong && phoneLat > poiLat){
-            return 180 + Math.toDegrees(Math.atan((phoneLong-poiLong)/(phoneLat-poiLat)));
-        } else if (phoneLong < poiLong && phoneLat > poiLat){
-            return 180 - Math.toDegrees(Math.atan((poiLong-phoneLong)/(phoneLat-poiLat)));
-        } else if (phoneLong == poiLong && phoneLat == poiLat){
-            // double check this
-            return -2;
-        } else if (phoneLong == poiLong && phoneLat < poiLat){
-            return 0;
-        } else if (phoneLong == poiLong && phoneLat > poiLat){
-            return 180;
-        } else if (phoneLat == poiLat && phoneLong < poiLong){
-            return 90;
-        } else if (phoneLat == poiLat && phoneLong > poiLong){
-            return 270;
-        }
-        // Something went wrong
-        return -1;
-    }
-
-    public static double getPOIDirection(double phoneLat, double phoneLong, double poiLat, double poiLong) {
+    public static double getPOIDirection(double phoneLong, double phoneLat, double poiLong, double poiLat) {
         double x = poiLong - phoneLong;
         double y = poiLat - phoneLat;
 
-        double direction = Math.toDegrees(Math.atan2(y, x));
+        double direction = Math.toDegrees(Math.atan2(y,x));
 
         if (phoneLong == poiLong && phoneLat == poiLat) {
             return -1;
@@ -45,7 +18,7 @@ public class ARMath {
             if (poiLat > phoneLat && poiLong >= phoneLong) { //quadrant I
                 return 90 - direction;
             } else if (poiLat >= phoneLat && poiLong < phoneLong ) { //quadrant II
-                return 270 - direction;
+                return 450 - direction;
             } else if (poiLat < phoneLat && poiLong <= phoneLong) { //quadrant III
                 return Math.abs(direction) + 90;
             } else { //quadrant IV (poiLat <= phoneLat && poiLong > phoneLong)
@@ -74,11 +47,6 @@ public class ARMath {
             return -2;
         } else {
             return angle;
-//            if(angle >= 0){
-//                return angle;
-//            } else {
-//                return angle + 360;
-//            }
         }
     }
 
@@ -107,10 +75,6 @@ public class ARMath {
         }
     }
 
-//    public static int getLeftRight(double phoneAngle, double poiAbsoluteAngle){
-//
-//    }
-
     public static int getSide(double phoneAngle, double poiAbsoluteAngle, double fov) {
         if (phoneAngle < poiAbsoluteAngle) {
             if ((poiAbsoluteAngle - phoneAngle) >= fov) {
@@ -127,8 +91,12 @@ public class ARMath {
         }
     }
 
-    public static double determineDisplayRatio(double poiRelativeAngle){
-        return 0;
+    public static float normalize(double value) {
+        if (value < 0) {
+            return (360 + (float)value);
+        } else {
+            return (float)value;
+        }
     }
 
 }
