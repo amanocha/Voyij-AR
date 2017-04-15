@@ -47,7 +47,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
+
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.phenotype.Configuration;
 
@@ -107,12 +110,23 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
         rotationSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
 
         checkPermissions();
+        restoreSettingsFromDisk();
         initializeSensors();
         initializeTextureView();
+        loadPOIsFromJSON();
         createPoints();
         //createImages();
         createTexts();
-        restoreSettingsFromDisk();
+
+    }
+
+    private void loadPOIsFromJSON() {
+        try {
+            List<POI> points = JSONToPOIGenerator.unMarshallJSONFile(getAssets().open("JSONPOIs/twoPOIs.txt"));
+            System.out.println(points);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void createPoints() {

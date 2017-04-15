@@ -1,11 +1,8 @@
 package voyij.ar;
 
-import java.util.List;
-
 /**
- * Created by Titan on 3/31/17.
+ * @author Chirag Tamboli
  */
-
 public class POI {
     public static final String TYPE_STORE = "Store";
     public static final String TYPE_RESTAURANT = "Restaurant";
@@ -15,20 +12,27 @@ public class POI {
     private String title;
     private double latitude;
     private double longitude;
+    private double altitude;
     private String POIType;
     private String description;
     private String imageSource;
     private String thumbnailSource;
-    private List<String> couponsSource;
+    private double distanceFromCurrentLocation;
+
 
     public POI(String title, double latitude, double longitude, String POIType) {
-        this(title, latitude, longitude, POIType, null, null, null);
+        this(title, latitude, longitude, Double.NaN, POIType, null, null, null);
     }
 
-    public POI(String title, double latitude, double longitude, String POIType, String description, String imageSource, String thumbnailSource) {
+    public POI(String title, double latitude, double longitude, double altitude, String POIType) {
+        this(title, latitude, longitude, altitude, POIType, null, null, null);
+    }
+
+    public POI(String title, double latitude, double longitude, double altitude, String POIType, String description, String imageSource, String thumbnailSource) {
         this.title = title;
         this.latitude = latitude;
         this.longitude = longitude;
+        this.altitude = altitude;
         this.POIType = POIType;
         this.description = description;
         this.imageSource = imageSource;
@@ -57,6 +61,14 @@ public class POI {
 
     public void setLongitude(double longitude) {
         this.longitude = longitude;
+    }
+
+    public double getAltitude() {
+        return altitude;
+    }
+
+    public void setAltitude(double altitude) {
+        this.altitude = altitude;
     }
 
     public String getDescription() {
@@ -91,8 +103,16 @@ public class POI {
         this.POIType = POIType;
     }
 
+    public double getDistanceFromCurrentLocation() {
+        return distanceFromCurrentLocation;
+    }
+
+    public void setDistanceFromCurrentLocation(double distanceFromCurrentLocation) {
+        this.distanceFromCurrentLocation = distanceFromCurrentLocation;
+    }
+
     @Override
     public String toString() {
-        return title + " (" + POIType + ")";
+        return "{" + title + " (" + POIType + "): " + "Lat: " + latitude + " Long: " + longitude + " Alt: " + altitude + "}";
     }
 }
