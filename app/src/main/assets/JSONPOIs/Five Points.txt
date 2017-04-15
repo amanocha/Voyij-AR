@@ -1,0 +1,54 @@
+{
+"type": "FeatureCollection",
+"features": [{
+"type": "Feature",
+"geometry": {
+"type": "Point",
+"coordinates": [-78.940278, 36.001901, 122]
+},
+"properties": {
+"title": "Chapel",
+"POIType" : "Landmark"
+}
+},{
+"type": "Feature",
+"geometry": {
+"type": "Point",
+"coordinates": [-78.939011, 36.000798, 120]
+},
+"properties": {
+"title": "West Union",
+"POIType" : "Restaurant"
+}
+},{
+"type": "Feature",
+"geometry": {
+"type": "Point",
+"coordinates": [-78.942173, 35.997592, 125]
+},
+"properties": {
+"title": "Cameron",
+"POIType" : "Landmark"
+}
+},{
+"type": "Feature",
+"geometry": {
+"type": "Point",
+"coordinates": [-78.947274, 35.998843, 111]
+},
+"properties": {
+"title": "Fuqua",
+"POIType" : "Landmark"
+}
+},{
+"type": "Feature",
+"geometry": {
+"type": "Point",
+"coordinates": [-78.941871, 36.004361, 107]
+},
+"properties": {
+"title": "LSRC",
+"POIType" : "Landmark"
+}
+}]
+}

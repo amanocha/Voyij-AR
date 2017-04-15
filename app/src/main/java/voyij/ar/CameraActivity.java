@@ -1,7 +1,6 @@
 package voyij.ar;
 
 import android.Manifest;
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -9,7 +8,6 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Point;
 import android.graphics.SurfaceTexture;
-import android.hardware.Camera;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -22,7 +20,6 @@ import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.params.StreamConfigurationMap;
-import android.hardware.camera2.CameraCharacteristics.*;
 import android.location.Location;
 import android.media.ImageReader;
 import android.os.Bundle;
@@ -40,19 +37,17 @@ import android.view.Display;
 import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.ImageView;
-import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import com.google.android.gms.location.LocationListener;
-import com.google.android.gms.phenotype.Configuration;
 
 public class CameraActivity extends AppCompatActivity implements SensorEventListener, LocationListener {
 
@@ -90,7 +85,9 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
     private Point fullScreenSize;
 
     // POI Variables
-    private POI[] points;
+    private static final String JSON_POI_DIRECTORY = "JSONPOIs";
+//    private POI[] points;
+    private List<POI> points;
     private ImageView[] images;
     private TextView[] texts;
     private int POIRange;
@@ -114,29 +111,33 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
         initializeSensors();
         initializeTextureView();
         loadPOIsFromJSON();
-        createPoints();
+//        createPoints();
         //createImages();
         createTexts();
 
     }
 
     private void loadPOIsFromJSON() {
+        points = new ArrayList<POI>();
         try {
-            List<POI> points = JSONToPOIGenerator.unMarshallJSONFile(getAssets().open("JSONPOIs/twoPOIs.txt"));
+            String[] files = getAssets().list(JSON_POI_DIRECTORY);
+            for (String file : files) {
+                points.addAll(JSONToPOIGenerator.unmarshallJSONFile(getAssets().open(JSON_POI_DIRECTORY +"/" + file)));
+            }
             System.out.println(points);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private void createPoints() {
-        points = new POI[5];
-        points[0] = new POI("Chapel", 36.001901, -78.940278, POI.TYPE_LANDMARK);
-        points[1] = new POI("West Union",36.000798 ,-78.939011, POI.TYPE_RESTAURANT);
-        points[2] = new POI("Cameron", 35.997592 , -78.942173, POI.TYPE_LANDMARK);
-        points[3] = new POI("Fuqua", 35.998843, -78.947274, POI.TYPE_LANDMARK);
-        points[4] = new POI("LSRC", 36.004361 , -78.941871, POI.TYPE_LANDMARK);
-    }
+//    private void createPoints() {
+//        points = new POI[5];
+//        points[0] = new POI("Chapel", 36.001901, -78.940278, POI.TYPE_LANDMARK);
+//        points[1] = new POI("West Union",36.000798 ,-78.939011, POI.TYPE_RESTAURANT);
+//        points[2] = new POI("Cameron", 35.997592 , -78.942173, POI.TYPE_LANDMARK);
+//        points[3] = new POI("Fuqua", 35.998843, -78.947274, POI.TYPE_LANDMARK);
+//        points[4] = new POI("LSRC", 36.004361 , -78.941871, POI.TYPE_LANDMARK);
+//    }
 
     private void createTexts(){
         texts = new TextView[5];
@@ -381,7 +382,7 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
             mCurrentOrientation[0] = ARMath.normalize(mOrientation2[0] - 90);
             mCurrentOrientation[1] = mOrientation[1];
 
-            for (int i = 0; i < points.length; i++) {
+            for (int i = 0; i < points.size(); i++) {
                 doMath(i);
             }
         }
@@ -390,7 +391,7 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
     @Override
     public void onLocationChanged(Location location) {
         mCurrentLocation = location;
-        for (int i = 0; i < points.length; i++) {
+        for (int i = 0; i < points.size(); i++) {
             doMath(i);
         }
     }
@@ -398,11 +399,11 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
     public void doMath(int i){
         if(mCurrentLocation != null){
             // X Calculations
-            double direction = ARMath.getPOIDirection(mCurrentLocation.getLongitude(), mCurrentLocation.getLatitude(), points[i].getLongitude(), points[i].getLatitude());
+            double direction = ARMath.getPOIDirection(mCurrentLocation.getLongitude(), mCurrentLocation.getLatitude(), points.get(i).getLongitude(), points.get(i).getLatitude());
             double differenceX = ARMath.getRelativeAngleOfPOI(mCurrentOrientation[0], direction);
 
             // Y Calculations
-            double distance = ARMath.getPOIDistance(mCurrentLocation.getLongitude(), mCurrentLocation.getLatitude(), points[i].getLongitude(), points[i].getLatitude());
+            double distance = ARMath.getPOIDistance(mCurrentLocation.getLongitude(), mCurrentLocation.getLatitude(), points.get(i).getLongitude(), points.get(i).getLatitude());
             double heightDifference = ARMath.getHeightDifference(0, 0);
             double absoluteHeightAngle = ARMath.getAbsoluteHeightAngle(distance, heightDifference);
             double differenceY = ARMath.getRelativeHeightAngle(mCurrentOrientation[1], absoluteHeightAngle);

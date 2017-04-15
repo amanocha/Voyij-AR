@@ -38,8 +38,8 @@ public class JSONToPOIGenerator {
      * @param pathname	The path to the JSON file.
      * @return A List of POI objects.
      */
-    public static List<POI> unMarshallJSONFile(String pathname) {
-        return unMarshallJSONFile(new File(pathname));
+    public static List<POI> unmarshallJSONFile(String pathname) {
+        return unmarshallJSONFile(new File(pathname));
     }
 
     /**
@@ -47,9 +47,9 @@ public class JSONToPOIGenerator {
      * @param file	The JSON file to unmarshall.
      * @return	A List of POI objects.
      */
-    public static List<POI> unMarshallJSONFile(File file) {
+    public static List<POI> unmarshallJSONFile(File file) {
         try {
-            return unMarshallJSONFile(new FileInputStream(file));
+            return unmarshallJSONFile(new FileInputStream(file));
         } catch (FileNotFoundException e) {
             System.out.println("File Not Found");
         }
@@ -61,7 +61,7 @@ public class JSONToPOIGenerator {
      * @param in	The inputstream to unmarshall.
      * @return	A List of POI objects.
      */
-    public static List<POI> unMarshallJSONFile(InputStream in) {
+    public static List<POI> unmarshallJSONFile(InputStream in) {
         List<POI> listOfPOI = new ArrayList<POI>();
         try {
             GeoJsonObject geoJsonObject = mapper.readValue(in, GeoJsonObject.class);
