@@ -112,6 +112,7 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
         createPoints();
         //createImages();
         createTexts();
+        restoreSettingsFromDisk();
     }
 
     private void createPoints() {
@@ -200,6 +201,7 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
         // If the phone doesn't have sensors, exit the app (or do something else)
         if(mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR) == null) {
             // Check to see if this actually works
+            System.out.println("App exiting. No rotation vector sensor");
             this.finish();
             return;
         }
