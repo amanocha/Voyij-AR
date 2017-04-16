@@ -1,9 +1,11 @@
 package voyij.ar;
 
+import android.support.annotation.NonNull;
+
 /**
  * @author Chirag Tamboli
  */
-public class POI {
+public class POI implements Comparable<POI> {
     public static final String TYPE_STORE = "Store";
     public static final String TYPE_RESTAURANT = "Restaurant";
     public static final String TYPE_UTILITY = "Utility";
@@ -112,7 +114,20 @@ public class POI {
     }
 
     @Override
+    public int compareTo(@NonNull POI o) {      //sorts from increasing distance from phone location
+        if (o.distanceFromCurrentLocation - this.distanceFromCurrentLocation < 0) {
+            return 1;
+        }
+        if (o.distanceFromCurrentLocation - this.distanceFromCurrentLocation > 0) {
+            return -1;
+        }
+        return this.title.compareTo(o.title);   //if distances equal, compare titles
+    }
+
+    @Override
     public String toString() {
         return "{" + title + " (" + POIType + "): " + "Lat: " + latitude + " Long: " + longitude + " Alt: " + altitude + "}";
     }
+
+
 }

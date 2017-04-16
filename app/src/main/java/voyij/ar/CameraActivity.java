@@ -45,6 +45,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import com.google.android.gms.location.LocationListener;
@@ -125,6 +126,7 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
                 points.addAll(JSONToPOIGenerator.unmarshallJSONFile(getAssets().open(JSON_POI_DIRECTORY +"/" + file)));
             }
             System.out.println(points);
+
         } catch (IOException e) {
             e.printStackTrace();
         }
