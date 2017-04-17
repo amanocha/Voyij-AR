@@ -115,6 +115,9 @@ public class POI implements Comparable<POI> {
 
     @Override
     public int compareTo(@NonNull POI o) {      //sorts from increasing distance from phone location
+        if(this == o){
+            return 0;
+        }
         if (o.distanceFromCurrentLocation - this.distanceFromCurrentLocation < 0) {
             return 1;
         }
@@ -129,5 +132,17 @@ public class POI implements Comparable<POI> {
         return "{" + title + " (" + POIType + "): " + "Lat: " + latitude + " Long: " + longitude + " Alt: " + altitude + "}";
     }
 
+    @Override
+    public boolean equals(Object o){
+        if(!(o instanceof POI)){
+            return false;
+        }
+        POI p = (POI) o;
+        return p == this;
+    }
 
+    @Override
+    public int hashCode(){
+      return 5;
+    }
 }

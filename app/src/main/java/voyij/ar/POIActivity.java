@@ -3,6 +3,7 @@ package voyij.ar;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.TextView;
 
 public class POIActivity extends AppCompatActivity {
@@ -29,5 +30,9 @@ public class POIActivity extends AppCompatActivity {
         mPOILatitude.setText(Double.toString(intent.getDoubleExtra(STATE_POI_LATITUDE, 0)));
         mPOILongitude.setText(Double.toString(intent.getDoubleExtra(STATE_POI_LONGITUDE, 0)));
         mPOIType.setText(intent.getStringExtra(STATE_POI_TYPE));
+    }
+
+    public void onButtonCloseClickAction(View view) {
+        this.finish();
     }
 }

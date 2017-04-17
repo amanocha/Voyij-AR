@@ -4,7 +4,7 @@
 "type": "Feature",
 "geometry": {
 "type": "Point",
-"coordinates": [-78.940278, 36.001901, 122]
+"coordinates": [-78.939874, 36.001712, 122]
 },
 "properties": {
 "title": "Chapel",
@@ -44,7 +44,7 @@
 "type": "Feature",
 "geometry": {
 "type": "Point",
-"coordinates": [-78.941871, 36.004361, 107]
+"coordinates": [-78.941871, 36.004377, 107]
 },
 "properties": {
 "title": "LSRC",

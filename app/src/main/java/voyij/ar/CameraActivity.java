@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.SurfaceTexture;
 import android.hardware.Sensor;
@@ -38,6 +39,7 @@ import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -46,7 +48,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import com.google.android.gms.location.LocationListener;
 
@@ -66,6 +72,7 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
     private ImageReader imageReader;
     private File file;
     private CameraManager cameraManager;
+    private RelativeLayout layout;
 
     // Sensor Variables
     private SensorManager mSensorManager;
@@ -87,10 +94,11 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
 
     // POI Variables
     private static final String JSON_POI_DIRECTORY = "JSONPOIs";
-//    private POI[] points;
-    private List<POI> points;
+    //    private POI[] points;
+    //private List<POI> points;
     private ImageView[] images;
-    private TextView[] texts;
+    //private ArrayList<TextView> texts;
+    private Map<POI, TextView> POIsToTextViews = new HashMap<POI, TextView>();
     private int POIRange;
     private boolean showStores;
     private boolean showRestaurants;
@@ -114,19 +122,38 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
         loadPOIsFromJSON();
 //        createPoints();
         //createImages();
-        createTexts();
-
+        //createTexts();
     }
 
     private void loadPOIsFromJSON() {
-        points = new ArrayList<POI>();
         try {
             String[] files = getAssets().list(JSON_POI_DIRECTORY);
             for (String file : files) {
-                points.addAll(JSONToPOIGenerator.unmarshallJSONFile(getAssets().open(JSON_POI_DIRECTORY +"/" + file)));
+                List<POI> listOfPOIs = JSONToPOIGenerator.unmarshallJSONFile(getAssets().open(JSON_POI_DIRECTORY +"/" + file));
+                for(POI p : listOfPOIs) {
+                    System.out.println(p.getTitle() + " " + p.getLatitude() + " " + p.getLongitude());
+                    TextView tv = new TextView(this);
+                    layout = (RelativeLayout) findViewById(R.id.cameralayout);
+                    tv.setVisibility(View.INVISIBLE);
+                    tv.setTextColor(Color.WHITE);
+                    tv.setTextSize(20);
+                    layout.addView(tv);
+                    tv.setText(p.getTitle());
+                    final POI finalPOI = p;
+                    tv.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            Intent intent = new Intent(CameraActivity.this, POIActivity.class);
+                            intent.putExtra(POIActivity.STATE_POI_NAME, finalPOI.getTitle());
+                            intent.putExtra(POIActivity.STATE_POI_LATITUDE, finalPOI.getLatitude());
+                            intent.putExtra(POIActivity.STATE_POI_LONGITUDE, finalPOI.getLongitude());
+                            intent.putExtra(POIActivity.STATE_POI_TYPE, finalPOI.getPOIType());
+                            startActivity(intent);
+                        }
+                    });
+                    POIsToTextViews.put(p, tv);
+                }
             }
-            System.out.println(points);
-
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -141,22 +168,21 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
 //        points[4] = new POI("LSRC", 36.004361 , -78.941871, POI.TYPE_LANDMARK);
 //    }
 
-    private void createTexts(){
-        texts = new TextView[5];
-
-        TextView tv1 = (TextView) findViewById(R.id.textView1);
-        TextView tv2 = (TextView) findViewById(R.id.textView2);
-        TextView tv3 = (TextView) findViewById(R.id.textView3);
-        TextView tv4 = (TextView) findViewById(R.id.textView4);
-        TextView tv5 = (TextView) findViewById(R.id.textView5);
-
-        texts[0] = tv1;
-        texts[1] = tv2;
-        texts[2] = tv3;
-        texts[3] = tv4;
-        texts[4] = tv5;
-
-    }
+//    private void createTexts(){
+//        texts = new TextView[5];
+//
+//        TextView tv1 = (TextView) findViewById(R.id.textView1);
+//        TextView tv2 = (TextView) findViewById(R.id.textView2);
+//        TextView tv3 = (TextView) findViewById(R.id.textView3);
+//        TextView tv4 = (TextView) findViewById(R.id.textView4);
+//        TextView tv5 = (TextView) findViewById(R.id.textView5);
+//
+//        texts[0] = tv1;
+//        texts[1] = tv2;
+//        texts[2] = tv3;
+//        texts[3] = tv4;
+//        texts[4] = tv5;
+//    }
 
 //    private void createImages(){
 //        images = new ImageView[5];
@@ -362,30 +388,30 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
     @Override
     public void onSensorChanged(SensorEvent event) {
         if (event.sensor.getType() == Sensor.TYPE_ROTATION_VECTOR) {
-            mAngles = lowPass(event.values, mAngles);
+            //mAngles = lowPass(event.values, mAngles);
+            mAngles = event.values;
 
             // Part 1 - used for Y axis calculations
             SensorManager.getRotationMatrixFromVector(mRotationMatrix, mAngles);
             SensorManager.remapCoordinateSystem(mRotationMatrix, SensorManager.AXIS_X, SensorManager.AXIS_Z, mRotationMatrix);
             SensorManager.getOrientation(mRotationMatrix, mOrientation);
             mOrientation[0] = ARMath.normalize(Math.round(Math.toDegrees(mOrientation[0])));
-            mOrientation[1] = (float) Math.round(Math.toDegrees(mOrientation[1]));
+            mOrientation[1] = (float) (Math.toDegrees(mOrientation[1]));
             mOrientation[2] = ARMath.normalize(Math.round(Math.toDegrees(mOrientation[2])));
 
             // Part 2 - used for X axis calculations
             SensorManager.getRotationMatrixFromVector(mRotationMatrix2, mAngles);
             SensorManager.remapCoordinateSystem(mRotationMatrix2, SensorManager.AXIS_Y, SensorManager.AXIS_MINUS_X, mRotationMatrix2);
             SensorManager.getOrientation(mRotationMatrix2, mOrientation2);
-            mOrientation2[0] = ARMath.normalize(Math.round(Math.toDegrees(mOrientation2[0])));
+            mOrientation2[0] = ARMath.normalize(Math.toDegrees(mOrientation2[0]));
             mOrientation2[1] = (float) Math.round(Math.toDegrees(mOrientation2[1]));
             mOrientation2[2] = ARMath.normalize(Math.round(Math.toDegrees(mOrientation2[2])));
-
 
             mCurrentOrientation[0] = ARMath.normalize(mOrientation2[0] - 90);
             mCurrentOrientation[1] = mOrientation[1];
 
-            for (int i = 0; i < points.size(); i++) {
-                doMath(i);
+            for (POI poi : POIsToTextViews.keySet()) {
+                checkSettingsAndDisplay(poi);
             }
         }
     }
@@ -393,21 +419,53 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
     @Override
     public void onLocationChanged(Location location) {
         mCurrentLocation = location;
-        for (int i = 0; i < points.size(); i++) {
-            doMath(i);
+        sortPOIsOnDistance();
+        for (POI poi : POIsToTextViews.keySet()) {
+            checkSettingsAndDisplay(poi);
         }
     }
 
-    public void doMath(int i){
+    private void checkSettingsAndDisplay(POI poi){
+        if(poi.getDistanceFromCurrentLocation() <= (POIRange/1000.0)){
+            if(showStores && poi.getPOIType().equals(POI.TYPE_STORE)){
+                doMath(poi);
+                return;
+            }
+            if(showLandmarks && poi.getPOIType().equals(POI.TYPE_LANDMARK)){
+                doMath(poi);
+                return;
+            }
+            if(showRestaurants && poi.getPOIType().equals(POI.TYPE_RESTAURANT)){
+                doMath(poi);
+                return;
+            }
+            if(showUtilities && poi.getPOIType().equals(POI.TYPE_UTILITY)){
+                doMath(poi);
+                return;
+            }
+        }
+        POIsToTextViews.get(poi).setVisibility(View.INVISIBLE);
+    }
+
+    private void sortPOIsOnDistance(){
+        for (POI poi : POIsToTextViews.keySet()){
+            double distance = ARMath.getPOIDistance(mCurrentLocation.getLongitude(), mCurrentLocation.getLatitude(), poi.getLongitude(), poi.getLatitude());
+            poi.setDistanceFromCurrentLocation(distance);
+        }
+        //Collections.sort(points);
+    }
+
+    public void doMath(POI poi){
         if(mCurrentLocation != null){
             // X Calculations
-            double direction = ARMath.getPOIDirection(mCurrentLocation.getLongitude(), mCurrentLocation.getLatitude(), points.get(i).getLongitude(), points.get(i).getLatitude());
+            double direction = ARMath.getPOIDirection(mCurrentLocation.getLongitude(), mCurrentLocation.getLatitude(), poi.getLongitude(), poi.getLatitude());
             double differenceX = ARMath.getRelativeAngleOfPOI(mCurrentOrientation[0], direction);
 
+
             // Y Calculations
-            double distance = ARMath.getPOIDistance(mCurrentLocation.getLongitude(), mCurrentLocation.getLatitude(), points.get(i).getLongitude(), points.get(i).getLatitude());
+            //double distance = ARMath.getPOIDistance(mCurrentLocation.getLongitude(), mCurrentLocation.getLatitude(), points.get(i).getLongitude(), points.get(i).getLatitude());
             double heightDifference = ARMath.getHeightDifference(0, 0);
-            double absoluteHeightAngle = ARMath.getAbsoluteHeightAngle(distance, heightDifference);
+            double absoluteHeightAngle = ARMath.getAbsoluteHeightAngle(poi.getDistanceFromCurrentLocation(), heightDifference);
             double differenceY = ARMath.getRelativeHeightAngle(mCurrentOrientation[1], absoluteHeightAngle);
 
 //            Add ImageViews
@@ -430,22 +488,25 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
 //            }
 
             // Add TextViews
+            TextView textView = POIsToTextViews.get(poi);
             if(differenceX/fov_x <= 1 && differenceY/fov_y <= 1) {
-                texts[i].setVisibility(View.VISIBLE);
+                //System.out.println(poi.getTitle() + " " + "layout:" + layout.getWidth() + "," + layout.getHeight() + " textView:" + textView.getWidth() + "," + textView.getHeight());
+                System.out.println(poi.getTitle() + " " + differenceX);
                 if (ARMath.getSide(mCurrentOrientation[0], direction, fov_x) == 0) {
-                    texts[i].setX((float) (activityScreenSize.x*(0.5 + differenceX/45) - texts[i].getWidth()/2));
+                    textView.setX((float) (layout.getWidth()*(0.5 + differenceX/35) - textView.getWidth()/2));
                 } else {
-                    texts[i].setX((float) (activityScreenSize.x*(0.5 - differenceX/45) - texts[i].getWidth()/2));
+                    textView.setX((float) (layout.getWidth()*(0.5 - differenceX/35) - textView.getWidth()/2));
                 }
 
                 if (ARMath.getAboveBelow(mCurrentOrientation[1], absoluteHeightAngle) == 0) {
-                    texts[i].setY((float) (activityScreenSize.y*(0.5 + differenceY/fov_y/2) - texts[i].getHeight()/2) + i*50);
+                    textView.setY((float) (layout.getHeight()*(0.5 + differenceY/fov_y/2) - textView.getHeight()/2));
                 } else {
-                    texts[i].setY((float) (activityScreenSize.y*(0.5 - differenceY/fov_y/2) - texts[i].getHeight()/2) + i*50);
+                    textView.setY((float) (layout.getHeight()*(0.5 - differenceY/fov_y/2) - textView.getHeight()/2));
                 }
-
+                textView.setVisibility(View.VISIBLE);
+                System.out.println(poi.getTitle() + " " + textView.getX() + " " + textView.getY());
             } else {
-                texts[i].setVisibility(View.INVISIBLE);
+                textView.setVisibility(View.INVISIBLE);
             }
         }
     }
