@@ -95,7 +95,7 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
     // POI Variables
     private static final String JSON_POI_DIRECTORY = "JSONPOIs";
     //    private POI[] points;
-    //private List<POI> points;
+    private List<POI> points = new ArrayList<POI>();
     private ImageView[] images;
     //private ArrayList<TextView> texts;
     private Map<POI, TextView> POIsToTextViews = new HashMap<POI, TextView>();
@@ -152,6 +152,7 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
                         }
                     });
                     POIsToTextViews.put(p, tv);
+                    points.add(p);
                 }
             }
         } catch (IOException e) {

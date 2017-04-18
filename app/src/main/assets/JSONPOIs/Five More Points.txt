@@ -1,0 +1,54 @@
+{
+"type": "FeatureCollection",
+"features": [{
+"type": "Feature",
+"geometry": {
+"type": "Point",
+"coordinates": [-78.945962, 35.998507, 115]
+},
+"properties": {
+"title": "Fuqua Bathroom",
+"POIType" : "Utility"
+}
+},{
+"type": "Feature",
+"geometry": {
+"type": "Point",
+"coordinates": [-78.939821, 35.999124, 122]
+},
+"properties": {
+"title": "Clocktower Quad",
+"POIType" : "Landmark"
+}
+},{
+"type": "Feature",
+"geometry": {
+"type": "Point",
+"coordinates": [-78.939743, 36.003399, 109]
+},
+"properties": {
+"title": "Twinnies",
+"POIType" : "Restaurant"
+}
+},{
+"type": "Feature",
+"geometry": {
+"type": "Point",
+"coordinates": [-78.944688, 36.001191, 115]
+},
+"properties": {
+"title": "Gross Hall",
+"POIType" : "Landmark"
+}
+},{
+"type": "Feature",
+"geometry": {
+"type": "Point",
+"coordinates": [-78.946036, 35.998492, 116]
+},
+"properties": {
+"title": "Fuqua Vending Machine",
+"POIType" : "Utility"
+}
+}]
+}
