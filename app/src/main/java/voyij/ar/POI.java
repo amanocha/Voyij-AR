@@ -2,10 +2,12 @@ package voyij.ar;
 
 import android.support.annotation.NonNull;
 
+import java.util.Comparator;
+
 /**
  * @author Chirag Tamboli
  */
-public class POI implements Comparable<POI> {
+public class POI {
     public static final String TYPE_STORE = "Store";
     public static final String TYPE_RESTAURANT = "Restaurant";
     public static final String TYPE_UTILITY = "Utility";
@@ -20,7 +22,7 @@ public class POI implements Comparable<POI> {
     private String imageSource;
     private String thumbnailSource;
     private double distanceFromCurrentLocation;
-
+    private static Comparator<POI> distanceComparator;
 
     public POI(String title, double latitude, double longitude, String POIType) {
         this(title, latitude, longitude, Double.NaN, POIType, null, null, null);
@@ -113,18 +115,11 @@ public class POI implements Comparable<POI> {
         this.distanceFromCurrentLocation = distanceFromCurrentLocation;
     }
 
-    @Override
-    public int compareTo(@NonNull POI o) {      //sorts from increasing distance from phone location
-        if(this == o){
-            return 0;
+    public static Comparator<POI> getIncreasingDistanceComparator() {
+        if (distanceComparator == null) {
+            distanceComparator = new DistanceComparator();
         }
-        if (o.distanceFromCurrentLocation - this.distanceFromCurrentLocation < 0) {
-            return 1;
-        }
-        if (o.distanceFromCurrentLocation - this.distanceFromCurrentLocation > 0) {
-            return -1;
-        }
-        return this.title.compareTo(o.title);   //if distances equal, compare titles
+        return distanceComparator;
     }
 
     @Override
@@ -142,7 +137,23 @@ public class POI implements Comparable<POI> {
     }
 
     @Override
-    public int hashCode(){
+    public int hashCode(){  //Remember Equal Elements must have same hashcodes...
       return 5;
+    }
+
+    private static final class DistanceComparator implements Comparator<POI> {
+        @Override
+        public int compare(POI o1, POI o2) {
+            if(o1 == o2){
+                return 0;
+            }
+            if (o1.distanceFromCurrentLocation - o2.distanceFromCurrentLocation < 0) {
+                return -1;
+            }
+            if (o1.distanceFromCurrentLocation - o2.distanceFromCurrentLocation > 0) {
+                return 1;
+            }
+            return o1.title.compareTo(o2.title);   //if distances equal, compare titles
+        }
     }
 }

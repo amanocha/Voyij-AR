@@ -48,11 +48,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 import com.google.android.gms.location.LocationListener;
 
@@ -70,7 +68,7 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
     private Handler mBackgroundHandler;
     private HandlerThread mBackgroundThread;
     private ImageReader imageReader;
-    private File file;
+//    private File file;
     private CameraManager cameraManager;
     private RelativeLayout layout;
 
@@ -95,9 +93,9 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
     // POI Variables
     private static final String JSON_POI_DIRECTORY = "JSONPOIs";
     //    private POI[] points;
-    private List<POI> points = new ArrayList<POI>();
     private ImageView[] images;
     //private ArrayList<TextView> texts;
+    private List<POI> points = new ArrayList<POI>();
     private Map<POI, TextView> POIsToTextViews = new HashMap<POI, TextView>();
     private int POIRange;
     private boolean showStores;
@@ -151,8 +149,8 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
                             startActivity(intent);
                         }
                     });
-                    POIsToTextViews.put(p, tv);
                     points.add(p);
+                    POIsToTextViews.put(p, tv);
                 }
             }
         } catch (IOException e) {
@@ -289,13 +287,14 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
         textureView.setSurfaceTextureListener(textureListener);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
     }
-
+    @Override
     protected void onStart() {
         super.onStart();
         mLocationSensor.start();
         mSensorManager.registerListener(this, rotationSensor, 1);
     }
 
+    @Override
     protected void onStop() {
         super.onStop();
         mLocationSensor.stop();
@@ -410,10 +409,12 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
 
             mCurrentOrientation[0] = ARMath.normalize(mOrientation2[0] - 90);
             mCurrentOrientation[1] = mOrientation[1];
-
-            for (POI poi : POIsToTextViews.keySet()) {
+            for (POI poi : points) {
                 checkSettingsAndDisplay(poi);
             }
+//            for (POI poi : POIsToTextViews.keySet()) {
+//                checkSettingsAndDisplay(poi);
+//            }
         }
     }
 
@@ -421,9 +422,12 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
     public void onLocationChanged(Location location) {
         mCurrentLocation = location;
         sortPOIsOnDistance();
-        for (POI poi : POIsToTextViews.keySet()) {
+        for (POI poi : points) {
             checkSettingsAndDisplay(poi);
         }
+//        for (POI poi : POIsToTextViews.keySet()) {
+//            checkSettingsAndDisplay(poi);
+//        }
     }
 
     private void checkSettingsAndDisplay(POI poi){
@@ -449,11 +453,15 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
     }
 
     private void sortPOIsOnDistance(){
-        for (POI poi : POIsToTextViews.keySet()){
+        for (POI poi : points) {
             double distance = ARMath.getPOIDistance(mCurrentLocation.getLongitude(), mCurrentLocation.getLatitude(), poi.getLongitude(), poi.getLatitude());
             poi.setDistanceFromCurrentLocation(distance);
         }
-        //Collections.sort(points);
+//        for (POI poi : POIsToTextViews.keySet()){
+//            double distance = ARMath.getPOIDistance(mCurrentLocation.getLongitude(), mCurrentLocation.getLatitude(), poi.getLongitude(), poi.getLatitude());
+//            poi.setDistanceFromCurrentLocation(distance);
+//        }
+        Collections.sort(points, POI.getIncreasingDistanceComparator());
     }
 
     public void doMath(POI poi){
