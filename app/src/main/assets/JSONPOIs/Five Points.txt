@@ -8,7 +8,8 @@
 },
 "properties": {
 "title": "Chapel",
-"POIType" : "Landmark"
+"POIType" : "Landmark",
+"description" : "Duke University Chapel is a chapel located at the center of the campus of Duke University in Durham, North Carolina, United States. It is an ecumenical Christian chapel and the center of religion at Duke, and has connections to the United Methodist Church. Constructed from 1930 to 1932, the Chapel seats about 1,800 people and stands 210 feet (64 m) tall, making it one of the tallest buildings in Durham County."
 }
 },{
 "type": "Feature",
@@ -18,7 +19,8 @@
 },
 "properties": {
 "title": "West Union",
-"POIType" : "Restaurant"
+"POIType" : "Restaurant",
+"description" : "Enjoy the Best Eatery of Duke! An incredible selection of global flavors prepared right before your eyes. A commitment to fresh, locally-sourced ingredients that satisfy your appetite. Vegetarian and vegan options always available, with made-to-order options to satisfy other dietary requirements. Order your meal, pick a spot, and make yourself comfortable."
 }
 },{
 "type": "Feature",
@@ -28,7 +30,8 @@
 },
 "properties": {
 "title": "Cameron",
-"POIType" : "Landmark"
+"POIType" : "Landmark",
+"description" : "Cameron Indoor Stadium is an indoor arena located on the campus of Duke University in Durham, North Carolina. The 9,314-seat facility is the primary indoor athletic venue for the Duke Blue Devils and serves as the home court for Duke men's and women's basketball and women's volleyball. It opened 77 years ago in January 1940 and was known as Duke Indoor Stadium until 1972, when it was named for Eddie Cameron, who served at Duke as men's basketball coach from 1928 to 1942, football coach from 1942 to 1945, and athletic director from 1951 to 1972."
 }
 },{
 "type": "Feature",
@@ -38,7 +41,8 @@
 },
 "properties": {
 "title": "Fuqua",
-"POIType" : "Landmark"
+"POIType" : "Landmark",
+"description" : "The Fuqua School of Business is the business school of Duke University in Durham, North Carolina, United States. It currently enrolls more than 1,300 students in degree-seeking programs."
 }
 },{
 "type": "Feature",
@@ -48,7 +52,8 @@
 },
 "properties": {
 "title": "LSRC",
-"POIType" : "Landmark"
+"POIType" : "Landmark",
+"description" : "The Levine Science Research Center (LSRC) is a 341,000-square-foot facility on Duke University's west campus located at 308 Research Drive Durham, NC 27708. The LSRC is currently the largest single-site interdisciplinary research facility in the U.S. Its classrooms are shared by several departments, but the majority of its offices and laboratories are utilized by the Nicholas School of the Environment, the Pratt School of Engineering, the Center for Cognitive Neuroscience and Developmental and the departments of Computer Science, Pharmacology and Cancer Biology and Cell and Molecular Biology. The building was named for Leon Levine, the CEO of Family Dollar Stores."
 }
 }]
 }

@@ -130,15 +130,15 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
                 List<POI> listOfPOIs = JSONToPOIGenerator.unmarshallJSONFile(getAssets().open(JSON_POI_DIRECTORY +"/" + file));
                 for(POI p : listOfPOIs) {
                     System.out.println(p.getTitle() + " " + p.getLatitude() + " " + p.getLongitude());
-                    TextView tv = new TextView(this);
+                    TextView textView = new TextView(this);
                     layout = (RelativeLayout) findViewById(R.id.cameralayout);
-                    tv.setVisibility(View.INVISIBLE);
-                    tv.setTextColor(Color.WHITE);
-                    tv.setTextSize(20);
-                    layout.addView(tv);
-                    tv.setText(p.getTitle());
+                    textView.setVisibility(View.INVISIBLE);
+                    textView.setTextColor(Color.WHITE);
+                    textView.setTextSize(20);
+                    layout.addView(textView);
+                    textView.setText(p.getTitle());
                     final POI finalPOI = p;
-                    tv.setOnClickListener(new View.OnClickListener() {
+                    textView.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
                             Intent intent = new Intent(CameraActivity.this, POIActivity.class);
@@ -146,11 +146,13 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
                             intent.putExtra(POIActivity.STATE_POI_LATITUDE, finalPOI.getLatitude());
                             intent.putExtra(POIActivity.STATE_POI_LONGITUDE, finalPOI.getLongitude());
                             intent.putExtra(POIActivity.STATE_POI_TYPE, finalPOI.getPOIType());
+                            intent.putExtra(POIActivity.STATE_POI_DESCRIPTION, finalPOI.getDescription());
                             startActivity(intent);
                         }
                     });
                     points.add(p);
-                    POIsToTextViews.put(p, tv);
+                    POIsToTextViews.put(p, textView);
+                    System.out.println(p.getTitle() + ": " + p.getDescription());
                 }
             }
         } catch (IOException e) {

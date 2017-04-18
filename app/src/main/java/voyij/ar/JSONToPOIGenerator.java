@@ -25,9 +25,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class JSONToPOIGenerator {
     private static final String KEY_PROPERTY_TITLE = "title";
     private static final String KEY_PROPERTY_POI_TYPE = "POIType";
+    private static final String KEY_PROPERTY_DESCRIPTION = "description";
 
     private static ObjectMapper mapper = new ObjectMapper();
-
 
     private JSONToPOIGenerator() {  //don't allow instantiation
     }
@@ -109,7 +109,8 @@ public class JSONToPOIGenerator {
             return null;
         }
         return new POI((String) feature.getProperty(KEY_PROPERTY_TITLE), coordinates.getLatitude(), coordinates.getLongitude(),
-                coordinates.getAltitude(), (String) feature.getProperty(KEY_PROPERTY_POI_TYPE));
+                coordinates.getAltitude(), (String) feature.getProperty(KEY_PROPERTY_POI_TYPE),
+                (String) feature.getProperty(KEY_PROPERTY_DESCRIPTION));
     }
 
 }

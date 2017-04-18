@@ -8,7 +8,8 @@
 },
 "properties": {
 "title": "Fuqua Bathroom",
-"POIType" : "Utility"
+"POIType" : "Utility",
+"description" : "A wonderful bathroom, located in Duke Fuqua School of Business. Complete with multiple sinks, latrines, and wastebins. This restroom has fascinating commodes that are a must-see when visiting Fuqua."
 }
 },{
 "type": "Feature",
@@ -18,7 +19,8 @@
 },
 "properties": {
 "title": "Clocktower Quad",
-"POIType" : "Landmark"
+"POIType" : "Landmark",
+"description" : "Located on Duke University West Campus, the Clocktower Quad is the perfect place to relax and enjoy one's afternoon."
 }
 },{
 "type": "Feature",
@@ -28,7 +30,8 @@
 },
 "properties": {
 "title": "Twinnies",
-"POIType" : "Restaurant"
+"POIType" : "Restaurant",
+"description" : "This Irish pub nestled in Duke's newest Engineering building, CIEMAS, offers hot-out-of-the-oven breakfast pastries, made-to-order sandwiches, and fresh entrée salads in addition to its classic blends of coffee and beer on tap"
 }
 },{
 "type": "Feature",
@@ -38,7 +41,8 @@
 },
 "properties": {
 "title": "Gross Hall",
-"POIType" : "Landmark"
+"POIType" : "Landmark",
+"description" : "The Paul M. Gross Hall, at the northeast corner of Science and Towerview, was named for long-time Chemistry Department Chairman Paul Gross. The 146,400-square-foot building opened in 1968."
 }
 },{
 "type": "Feature",
@@ -48,7 +52,8 @@
 },
 "properties": {
 "title": "Fuqua Vending Machine",
-"POIType" : "Utility"
+"POIType" : "Utility",
+"description" : "Craving a snack? Fuqua's premier vending machine will provide many snacks and drinks to suit your taste."
 }
 }]
 }

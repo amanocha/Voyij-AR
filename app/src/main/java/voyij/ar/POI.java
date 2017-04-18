@@ -32,6 +32,10 @@ public class POI {
         this(title, latitude, longitude, altitude, POIType, null, null, null);
     }
 
+    public POI(String title, double latitude, double longitude, double altitude, String POIType, String description) {
+        this(title, latitude, longitude, altitude, POIType, description, null, null);
+    }
+
     public POI(String title, double latitude, double longitude, double altitude, String POIType, String description, String imageSource, String thumbnailSource) {
         this.title = title;
         this.latitude = latitude;
