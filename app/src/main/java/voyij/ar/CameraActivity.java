@@ -311,7 +311,7 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
         } else {
             textureView.setSurfaceTextureListener(textureListener);
         }
-        mCompassSensor.registerLocationListener(this);
+        mSensorManager.registerListener(this, rotationSensor, 1);
     }
 
     @Override
@@ -320,7 +320,7 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
         closeCamera();
         stopBackgroundThread();
         super.onPause();
-        mCompassSensor.unregisterLocationListener(this);
+        mSensorManager.unregisterListener(this);
     }
 
     protected void startBackgroundThread() {
@@ -553,7 +553,6 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
             cameraDevice = null;
         }
     };
-
 
 
     protected void createCameraPreview() {
