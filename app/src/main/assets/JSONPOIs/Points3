@@ -1,0 +1,59 @@
+{
+"type": "FeatureCollection",
+"features": [{
+"type": "Feature",
+"geometry": {
+"type": "Point",
+"coordinates": [-78.943898, 35.999389, 121]
+},
+"properties": {
+"title": "Sanford",
+"POIType" : "Landmark",
+"description" : "The Sanford School of Public Policy is the institute for Policy Sciences and Public Affairs at Duke University. Named after former Duke president and Governer of North Carolina Terry Sanford, it offers bachelor's, master's, and doctoral programs in Public Policy."
+}
+},{
+"type": "Feature",
+"geometry": {
+"type": "Point",
+"coordinates": [-78.914657, 36.009037, 128]
+},
+"properties": {
+"title": "Baldwin Auditorium",
+"POIType" : "Landmark",
+"description" : "Baldwin Auditorium is a performance venue that seats 691 patrons and contains two seating areas: Orchestra Seating and Balcony Seating. There are seats that can be removed to accommodate guests with wheelchairs, and seats can also be reserved."
+}
+},{
+"type": "Feature",
+"geometry": {
+"type": "Point",
+"coordinates": [-78.923328, 36.010676, 120]
+},
+"properties": {
+"title": "Harris Teeter",
+"POIType" : "Store",
+"description" : "Harris Teeter is a supermarket chain that sells groceries and contains both a pharmacy and Starbucks. It is a popular store for students of Duke University who live off-campus to purchase food products."
+}
+},{
+"type": "Feature",
+"geometry": {
+"type": "Point",
+"coordinates": [-78.944904, 35.999979, 118]
+},
+"properties": {
+"title": "Law School",
+"POIType" : "Landmark",
+"description" : "The Duke School of Law is one of Duke's 10 schools and colleges and is an established graduate professional school. It is ranked one of the top 14 law schools in the country and offers four different graduate degree programs."
+}
+},{
+"type": "Feature",
+"geometry": {
+"type": "Point",
+"coordinates": [-78.941707, 35.995560, 103]
+},
+"properties": {
+"title": "Wallace Wade",
+"POIType" : "Landmark",
+"description" : "Wallace Wade Stadium is a stadium primarily used for football games on Duke University's campus. It contains 40,004 seats and is the home field of the Duke Blue Devils. It is well known as the site of the 1942 Rose Bowl Game and was renamed in 1967 after football coach Wallace Wade."
+}
+}]
+}
