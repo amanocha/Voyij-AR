@@ -29,6 +29,8 @@ import android.os.HandlerThread;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.text.SpannableString;
+import android.text.style.ImageSpan;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.SizeF;
@@ -38,6 +40,7 @@ import android.view.Display;
 import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -121,6 +124,7 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
 //        createPoints();
         //createImages();
         //createTexts();
+
     }
 
     private void loadPOIsFromJSON() {
@@ -129,12 +133,14 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
             for (String file : files) {
                 List<POI> listOfPOIs = JSONToPOIGenerator.unmarshallJSONFile(getAssets().open(JSON_POI_DIRECTORY +"/" + file));
                 for(POI p : listOfPOIs) {
-                    System.out.println(p.getTitle() + " " + p.getLatitude() + " " + p.getLongitude());
                     TextView textView = new TextView(this);
                     layout = (RelativeLayout) findViewById(R.id.cameralayout);
                     textView.setVisibility(View.INVISIBLE);
                     textView.setTextColor(Color.WHITE);
                     textView.setTextSize(20);
+                    ImageSpan is = new ImageSpan(this, R.drawable.building);
+                    SpannableString text = new SpannableString(p.getTitle());
+                    text.setSpan(is, 5, 15, 0);
                     layout.addView(textView);
                     textView.setText(p.getTitle());
                     final POI finalPOI = p;
@@ -312,7 +318,7 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
         } else {
             textureView.setSurfaceTextureListener(textureListener);
         }
-        mCompassSensor.registerLocationListener(this);
+        mSensorManager.registerListener(this, rotationSensor, 1);
     }
 
     @Override
@@ -321,7 +327,7 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
         closeCamera();
         stopBackgroundThread();
         super.onPause();
-        mCompassSensor.unregisterLocationListener(this);
+        mSensorManager.unregisterListener(this);
     }
 
     protected void startBackgroundThread() {
@@ -425,6 +431,7 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
         mCurrentLocation = location;
         sortPOIsOnDistance();
         for (POI poi : points) {
+            System.out.println(poi.getTitle() + " " + poi.getDistanceFromCurrentLocation());
             checkSettingsAndDisplay(poi);
         }
 //        for (POI poi : POIsToTextViews.keySet()) {
@@ -510,9 +517,9 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
                 }
 
                 if (ARMath.getAboveBelow(mCurrentOrientation[1], absoluteHeightAngle) == 0) {
-                    textView.setY((float) (layout.getHeight()*(0.5 + differenceY/fov_y/2) - textView.getHeight()/2));
+                    textView.setY((float) (layout.getHeight()*(0.5 + differenceY/fov_y/2) - textView.getHeight()/2) - points.indexOf(poi)*75);
                 } else {
-                    textView.setY((float) (layout.getHeight()*(0.5 - differenceY/fov_y/2) - textView.getHeight()/2));
+                    textView.setY((float) (layout.getHeight()*(0.5 - differenceY/fov_y/2) - textView.getHeight()/2) - points.indexOf(poi)*75);
                 }
                 textView.setVisibility(View.VISIBLE);
                 System.out.println(poi.getTitle() + " " + textView.getX() + " " + textView.getY());
@@ -563,7 +570,6 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
             cameraDevice = null;
         }
     };
-
 
 
     protected void createCameraPreview() {
