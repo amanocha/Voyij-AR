@@ -33,9 +33,9 @@ public class POIActivity extends AppCompatActivity {
         mPOIPicture = (ImageView) findViewById(R.id.imageViewPicture);
         Intent intent = getIntent();
         mPOITitle.setText(intent.getStringExtra(STATE_POI_NAME));
-        mPOILatitude.setText(Double.toString(intent.getDoubleExtra(STATE_POI_LATITUDE, 0)));
-        mPOILongitude.setText(Double.toString(intent.getDoubleExtra(STATE_POI_LONGITUDE, 0)));
-        mPOIType.setText(intent.getStringExtra(STATE_POI_TYPE));
+        mPOILatitude.setText("Latitude: " + Double.toString(intent.getDoubleExtra(STATE_POI_LATITUDE, 0)));
+        mPOILongitude.setText("Longitude: " + Double.toString(intent.getDoubleExtra(STATE_POI_LONGITUDE, 0)));
+        mPOIType.setText("Type: " + intent.getStringExtra(STATE_POI_TYPE));
         mPOIDescription.setText(intent.getStringExtra(STATE_POI_DESCRIPTION));
         setPicture();
     }
