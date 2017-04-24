@@ -17,13 +17,19 @@ public class SettingsActivity extends AppCompatActivity {
     protected static final String STATE_SHOW_RESTAURANTS = "SHOW_RESTAURANTS";
     protected static final String STATE_SHOW_UTILITIES = "SHOW_UTILITIES";
     protected static final String STATE_SHOW_LANDMARKS = "SHOW_LANDMARKS";
+    protected static final String STATE_MAX_POINTS_TO_DISPLAY = "MAX_POINTS";
 
     private SeekBar mPOIRangeSlider;
+    private TextView mPOIRangeIndicator;
+    private SeekBar mMaxPointsSlider;
+    private TextView mMaxPointsIndicator;
     private CheckBox mCheckBoxPOIStores;
     private CheckBox mCheckBoxPOIRestaurants;
     private CheckBox mCheckBoxPOIUtilities;
     private CheckBox mCheckBoxPOILandmarks;
-    private TextView mPOIRangeIndicator;
+
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -35,6 +41,8 @@ public class SettingsActivity extends AppCompatActivity {
         mCheckBoxPOIUtilities = (CheckBox) findViewById(R.id.checkBoxUtilities);
         mCheckBoxPOILandmarks = (CheckBox) findViewById(R.id.checkBoxLandmarks);
         mPOIRangeIndicator = (TextView) findViewById(R.id.textViewRangeIndicator);
+        mMaxPointsSlider = (SeekBar) findViewById(R.id.seekBarMaxPoints);
+        mMaxPointsIndicator = (TextView) findViewById(R.id.textViewMaxPointsIndicator);
         mPOIRangeSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -55,7 +63,28 @@ public class SettingsActivity extends AppCompatActivity {
 
             }
         });
+        mMaxPointsSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (seekBar.getProgress() == 1) {
+                    mMaxPointsIndicator.setText("" + seekBar.getProgress() + " Point");
+                } else {
+                    mMaxPointsIndicator.setText("" + seekBar.getProgress() + " Points");
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
         loadPreviousSettings();
+
     }
 
     private void loadPreviousSettings() {
@@ -63,6 +92,8 @@ public class SettingsActivity extends AppCompatActivity {
         if (intent != null) {
             mPOIRangeSlider.setProgress(intent.getIntExtra(STATE_POI_RANGE, 1000));
             mPOIRangeIndicator.setText(""+intent.getIntExtra(STATE_POI_RANGE, 1000));
+            mMaxPointsSlider.setProgress(intent.getIntExtra(STATE_MAX_POINTS_TO_DISPLAY, 20));
+            mMaxPointsIndicator.setText(""+intent.getIntExtra(STATE_MAX_POINTS_TO_DISPLAY, 20));
             mCheckBoxPOIStores.setChecked(intent.getBooleanExtra(STATE_SHOW_STORES, true));
             mCheckBoxPOIRestaurants.setChecked(intent.getBooleanExtra(STATE_SHOW_RESTAURANTS, true));
             mCheckBoxPOIUtilities.setChecked(intent.getBooleanExtra(STATE_SHOW_UTILITIES, true));
@@ -73,6 +104,7 @@ public class SettingsActivity extends AppCompatActivity {
     public void saveAndCloseButtonAction(View view) {
         Intent toSend = new Intent();
         toSend.putExtra(STATE_POI_RANGE, mPOIRangeSlider.getProgress());
+        toSend.putExtra(STATE_MAX_POINTS_TO_DISPLAY, mMaxPointsSlider.getProgress());
         toSend.putExtra(STATE_SHOW_STORES, mCheckBoxPOIStores.isChecked());
         toSend.putExtra(STATE_SHOW_RESTAURANTS, mCheckBoxPOIRestaurants.isChecked());
         toSend.putExtra(STATE_SHOW_UTILITIES, mCheckBoxPOIUtilities.isChecked());
@@ -87,6 +119,7 @@ public class SettingsActivity extends AppCompatActivity {
         SharedPreferences prefs = getSharedPreferences(KEY_AR_PREFS, MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
         editor.putInt(STATE_POI_RANGE, mPOIRangeSlider.getProgress());
+        editor.putInt(STATE_MAX_POINTS_TO_DISPLAY, mMaxPointsSlider.getProgress());
         editor.putBoolean(STATE_SHOW_STORES, mCheckBoxPOIStores.isChecked());
         editor.putBoolean(STATE_SHOW_RESTAURANTS, mCheckBoxPOIRestaurants.isChecked());
         editor.putBoolean(STATE_SHOW_UTILITIES, mCheckBoxPOIUtilities.isChecked());
