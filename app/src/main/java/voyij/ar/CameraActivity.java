@@ -139,6 +139,7 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
                 List<POI> listOfPOIs = JSONToPOIGenerator.unmarshallJSONFile(getAssets().open(JSON_POI_DIRECTORY +"/" + file));
                 for(POI p : listOfPOIs) {
                     TextView textView = new TextView(this);
+//                    textView.setCompoundDrawablesWithIntrinsicBounds(R.drawable.building, 0, 0, 0);
                     textView.setVisibility(View.INVISIBLE);
                     textView.setTextColor(Color.WHITE);
                     textView.setTextSize(20);
@@ -146,7 +147,7 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
                     SpannableString text = new SpannableString(p.getTitle());
 //                    text.setSpan(is, 5, 15, 0);
                     layout.addView(textView);
-                    textView.setText(p.getTitle());
+                    textView.setText(p.getTitle() + "\n" + 0.0);
                     final POI finalPOI = p;
                     textView.setOnClickListener(new View.OnClickListener() {
                         @Override
@@ -516,15 +517,11 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
 
 
             TextView textView = POIsToTextViews.get(poi);
-            int howmanyVisible = 0;
-            Rect r = new Rect();
-            layout.getHitRect(r);
-            for (TextView view : POIsToTextViews.values()) {
-                if (view.getLocalVisibleRect(r)) {
-                    howmanyVisible++;
-                }
-            }
-            currentPOIsDisplayed = howmanyVisible;
+
+            currentPOIsDisplayed = checkHowManyPOIOnScreen(poi);
+//            if (currentPOIsDisplayed > maxPOIsToDisp) {
+//                return;
+//            }
             System.out.println("currPoiDisplayed: " + currentPOIsDisplayed);
             if(differenceX/fov_x <= 1 && differenceY/fov_y <= 1) {
                 //System.out.println(poi.getTitle() + " " + "layout:" + layout.getWidth() + "," + layout.getHeight() + " textView:" + textView.getWidth() + "," + textView.getHeight());
@@ -540,19 +537,42 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
                 } else {
                     textView.setY((float) (layout.getHeight()*(0.5 - differenceY/fov_y/2) - textView.getHeight()/2) - points.indexOf(poi)*75);
                 }
-
-                textView.setVisibility(View.VISIBLE);
-
-
-
+                if (maxPOIsToDisp > checkHowManyPOIOnScreen(poi)) {
+                    textView.setVisibility(View.VISIBLE);
+                } else {
+                    textView.setVisibility(View.INVISIBLE);
+                }
+//                textView.setVisibility(View.VISIBLE);
                 System.out.println(poi.getTitle() + " " + textView.getX() + " " + textView.getY());
             } else {
-
                 textView.setVisibility(View.INVISIBLE);
             }
-
+//            currentPOIsDisplayed = checkHowManyPOIOnScreen();
 
         }
+    }
+
+    private int checkHowManyPOIOnScreen(POI p) {
+        int howmanyVisible = 0;
+//        Rect r = new Rect();
+//        layout.getHitRect(r);
+//        for (POI poi : points) {
+//            if (POIsToTextViews.get(poi).getLocalVisibleRect(r)) {
+//                howmanyVisible++;
+//            }
+//        }
+//        for (TextView view : POIsToTextViews.values()) {
+//            System.out.println(POIsToTextViews.values());
+//            if (view.getVisibility() == View.VISIBLE) {
+//                howmanyVisible++;
+//            }
+//        }
+        for (POI poi : points) {
+            if (poi != p && POIsToTextViews.get(poi).getVisibility() == View.VISIBLE) {
+                howmanyVisible++;
+            }
+        }
+        return howmanyVisible;
     }
 
 
