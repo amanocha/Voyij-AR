@@ -1,0 +1,59 @@
+{
+"type": "FeatureCollection",
+"features": [{
+"type": "Feature",
+"geometry": {
+"type": "Point",
+"coordinates": [-78.947841, 35.999299, 122]
+},
+"properties": {
+"title": "Fuqua MMS Room",
+"POIType" : "Landmark",
+"description" : "The Fuqua MMS Room is one of the greatest places on campus to meet with your team for any project, and perhaps build the world's best augmented reality navigation app!"
+}
+},{
+"type": "Feature",
+"geometry": {
+"type": "Point",
+"coordinates": [-78.947410, 35.998507, 122]
+},
+"properties": {
+"title": "Fuqua Cafe",
+"POIType" : "Restaurant",
+"description" : "Grab a delicious bite to eat and earn an MBA at the same time!"
+}
+},{
+"type": "Feature",
+"geometry": {
+"type": "Point",
+"coordinates": [-78.946147, 35.998794, 120]
+},
+"properties": {
+"title": "Lilly Classroom",
+"POIType" : "Landmark",
+"description" : "Who wouldn't want to go to class with the locale is this luxurious classroom in Fuqua? Caroline kids, I guess..."
+}
+},{
+"type": "Feature",
+"geometry": {
+"type": "Point",
+"coordinates": [-78.938285, 36.000957, 120]
+},
+"properties": {
+"title": "West Bus Stop",
+"POIType" : "Utility",
+"description" : "See the sights of Duke using the various buses it has! Fun fact: The C1 can get from East Campus to West Campus in 9 minutes, and does 0-60 in 13.6 seconds."
+}
+},{
+"type": "Feature",
+"geometry": {
+"type": "Point",
+"coordinates": [-78.946883, 35.999071, 120]
+},
+"properties": {
+"title": "Hall of Flags",
+"POIType" : "Landmark",
+"description" : "Celebrate diversity and spend a Saturday night by viewing the flag of every country on Earth!"
+}
+}]
+}
