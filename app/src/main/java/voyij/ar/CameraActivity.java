@@ -138,9 +138,10 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
                     textView.setVisibility(View.INVISIBLE);
                     textView.setTextColor(Color.WHITE);
                     textView.setTextSize(20);
-                    ImageSpan is = new ImageSpan(this, R.drawable.building);
-                    SpannableString text = new SpannableString(p.getTitle());
-                    text.setSpan(is, 5, 15, 0);
+                    textView.setCompoundDrawablesWithIntrinsicBounds(R.drawable.building, 0, 0, 0);
+//                    ImageSpan is = new ImageSpan(this, R.drawable.building);
+//                    SpannableString text = new SpannableString(p.getTitle());
+//                    text.setSpan(is, 5, 15, 0);
                     layout.addView(textView);
                     textView.setText(p.getTitle());
                     final POI finalPOI = p;
