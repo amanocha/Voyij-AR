@@ -26,7 +26,7 @@
 "type": "Feature",
 "geometry": {
 "type": "Point",
-"coordinates": [-78.939743, 36.003399, 109]
+"coordinates": [-78.939744, 36.003394, 109]
 },
 "properties": {
 "title": "Twinnies",
