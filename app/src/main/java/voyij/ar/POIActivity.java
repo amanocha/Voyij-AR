@@ -38,6 +38,7 @@ public class POIActivity extends AppCompatActivity {
         mPOIType.setText("Type: " + intent.getStringExtra(STATE_POI_TYPE));
         mPOIDescription.setText(intent.getStringExtra(STATE_POI_DESCRIPTION));
         setPicture();
+        getSupportActionBar().hide();
     }
 
     private void setPicture() {
