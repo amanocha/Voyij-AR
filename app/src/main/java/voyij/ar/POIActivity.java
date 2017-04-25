@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 public class POIActivity extends AppCompatActivity {
@@ -18,6 +19,7 @@ public class POIActivity extends AppCompatActivity {
     private TextView mPOILongitude;
     private TextView mPOIType;
     private TextView mPOIDescription;
+    private ImageView mPOIPicture;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,12 +30,33 @@ public class POIActivity extends AppCompatActivity {
         mPOILongitude = (TextView) findViewById(R.id.textViewLongitude);
         mPOIType = (TextView) findViewById(R.id.textViewPOIType);
         mPOIDescription = (TextView) findViewById(R.id.textViewDescription);
+        mPOIPicture = (ImageView) findViewById(R.id.imageViewPicture);
         Intent intent = getIntent();
         mPOITitle.setText(intent.getStringExtra(STATE_POI_NAME));
-        mPOILatitude.setText(Double.toString(intent.getDoubleExtra(STATE_POI_LATITUDE, 0)));
-        mPOILongitude.setText(Double.toString(intent.getDoubleExtra(STATE_POI_LONGITUDE, 0)));
-        mPOIType.setText(intent.getStringExtra(STATE_POI_TYPE));
+        mPOILatitude.setText("Latitude: " + Double.toString(intent.getDoubleExtra(STATE_POI_LATITUDE, 0)));
+        mPOILongitude.setText("Longitude: " + Double.toString(intent.getDoubleExtra(STATE_POI_LONGITUDE, 0)));
+        mPOIType.setText("Type: " + intent.getStringExtra(STATE_POI_TYPE));
         mPOIDescription.setText(intent.getStringExtra(STATE_POI_DESCRIPTION));
+        setPicture();
+    }
+
+    private void setPicture() {
+        String poiType = getIntent().getStringExtra(STATE_POI_TYPE);
+        if (poiType.equals(POI.TYPE_LANDMARK)) {
+            mPOIPicture.setImageDrawable(getDrawable(R.drawable.landmark));
+        }
+        else if (poiType.equals(POI.TYPE_RESTAURANT)) {
+            mPOIPicture.setImageDrawable(getDrawable(R.drawable.restaurant));
+        }
+        else if (poiType.equals(POI.TYPE_STORE)) {
+            mPOIPicture.setImageDrawable(getDrawable(R.drawable.store));
+        }
+        else if (poiType.equals(POI.TYPE_UTILITY)) {
+            mPOIPicture.setImageDrawable(getDrawable(R.drawable.utility));
+        }
+        else {
+            mPOIPicture.setVisibility(View.INVISIBLE);
+        }
     }
 
     public void onButtonCloseClickAction(View view) {
