@@ -113,6 +113,8 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
     private boolean showRestaurants;
     private boolean showUtilities;
     private boolean showLandmarks;
+    private int thumbnailWidth = 175;
+    private int thumbnailHeight = 175;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -148,20 +150,27 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
                     textView.setTextColor(Color.WHITE);
                     textView.setTextSize(20);
 
-//                    if(p.getPOIType().equals(POI.TYPE_LANDMARK)){
-////                        Drawable d = getDrawable(R.drawable.restaurant);
-////                        d.setBounds(0, 0, 40, 40);
-//                        textView.setCompoundDrawablesWithIntrinsicBounds(R.drawable.restaurant, 0, 0, 0);
-//                    } else if (p.getPOIType().equals(POI.TYPE_RESTAURANT)){
-//                        getDrawable(R.drawable.restaurant).setBounds(0, 0, 40, 40);
-//                        textView.setCompoundDrawablesWithIntrinsicBounds(R.drawable.restaurant, 0, 0, 0);
-//                    } else if (p.getPOIType().equals(POI.TYPE_STORE)){
-//                        getDrawable(R.drawable.store).setBounds(0, 0, 40, 40);
-//                        textView.setCompoundDrawablesWithIntrinsicBounds(R.drawable.store, 0, 0, 0);
-//                    } else if (p.getPOIType().equals(POI.TYPE_UTILITY)){
-//                        getDrawable(R.drawable.utility).setBounds(0, 0, 40, 40);
-//                        textView.setCompoundDrawablesWithIntrinsicBounds(R.drawable.utility, 0, 0, 0);
-//                    }
+                    if(p.getPOIType().equals(POI.TYPE_LANDMARK)){
+                        Drawable dr = getDrawable(R.drawable.landmark);
+                        Bitmap bitmap = ((BitmapDrawable) dr).getBitmap();
+                        Drawable d = new BitmapDrawable(getResources(), Bitmap.createScaledBitmap(bitmap, thumbnailWidth, thumbnailHeight, true));
+                        textView.setCompoundDrawablesWithIntrinsicBounds(d, null, null, null);
+                    } else if (p.getPOIType().equals(POI.TYPE_RESTAURANT)){
+                        Drawable dr = getDrawable(R.drawable.restaurant);
+                        Bitmap bitmap = ((BitmapDrawable) dr).getBitmap();
+                        Drawable d = new BitmapDrawable(getResources(), Bitmap.createScaledBitmap(bitmap, thumbnailWidth, thumbnailHeight, true));
+                        textView.setCompoundDrawablesWithIntrinsicBounds(d, null, null, null);
+                    } else if (p.getPOIType().equals(POI.TYPE_STORE)){
+                        Drawable dr = getDrawable(R.drawable.store);
+                        Bitmap bitmap = ((BitmapDrawable) dr).getBitmap();
+                        Drawable d = new BitmapDrawable(getResources(), Bitmap.createScaledBitmap(bitmap, thumbnailWidth, thumbnailHeight, true));
+                        textView.setCompoundDrawablesWithIntrinsicBounds(d, null, null, null);
+                    } else if (p.getPOIType().equals(POI.TYPE_UTILITY)){
+                        Drawable dr = getDrawable(R.drawable.utility);
+                        Bitmap bitmap = ((BitmapDrawable) dr).getBitmap();
+                        Drawable d = new BitmapDrawable(getResources(), Bitmap.createScaledBitmap(bitmap, thumbnailWidth, thumbnailHeight, true));
+                        textView.setCompoundDrawablesWithIntrinsicBounds(d, null, null, null);
+                    }
 
 //                    ImageSpan is = new ImageSpan(this, R.drawable.building);
 //                    SpannableString text = new SpannableString(p.getTitle());
@@ -554,9 +563,9 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
                 }
 
                 if (ARMath.getAboveBelow(mCurrentOrientation[1], absoluteHeightAngle) == 0) {
-                    textView.setY((float) (layout.getHeight()*(0.5 + differenceY/fov_y/2) - textView.getHeight()/2) - points.indexOf(poi)*75);
+                    textView.setY((float) (layout.getHeight()*(0.9 + differenceY/fov_y/2) - textView.getHeight()) - points.indexOf(poi)*175);
                 } else {
-                    textView.setY((float) (layout.getHeight()*(0.5 - differenceY/fov_y/2) - textView.getHeight()/2) - points.indexOf(poi)*75);
+                    textView.setY((float) (layout.getHeight()*(0.9 - differenceY/fov_y/2) - textView.getHeight()) - points.indexOf(poi)*175);
                 }
                 if (maxPOIsToDisp > checkHowManyPOIOnScreen(poi)) {
                     textView.setVisibility(View.VISIBLE);
