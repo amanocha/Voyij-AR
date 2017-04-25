@@ -99,7 +99,7 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
     private float[] mOrientation2;
     private float[] mAngles;
     private Compass mCompassSensor;
-    //private LocationGPS mLocationSensor;
+    private LocationGPS mLocationSensor;
     private Location mCurrentLocation;
     private float[] mCurrentOrientation;
 
@@ -256,7 +256,7 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
 
     private void initializeSensors(){
         mCompassSensor = new Compass(mSensorManager);
-        //mLocationSensor = new LocationGPS(this, this);
+        mLocationSensor = new LocationGPS(this, this);
         mCurrentOrientation = new float[3];
 
         mRotationMatrix = new float[16];
@@ -285,14 +285,14 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
     @Override
     protected void onStart() {
         super.onStart();
-        //mLocationSensor.start();
+        mLocationSensor.start();
         mSensorManager.registerListener(this, rotationSensor, 1);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        //mLocationSensor.stop();
+        mLocationSensor.stop();
     }
 
     @Override
