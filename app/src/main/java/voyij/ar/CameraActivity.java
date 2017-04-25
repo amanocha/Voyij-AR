@@ -1,5 +1,14 @@
 package voyij.ar;
 
+/**
+ * Authors: Sam Toffler, Aninda Manocha, Chirag Tamboli
+ * Date: March 23, 2017
+ *
+ * This class is the main class of the app and contains the camera functionality as well as
+ * functions that direct the function of the app based on the behavior of the orientation and
+ * location sensors.
+ */
+
 import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
@@ -129,11 +138,6 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
         initializeSensors();
         initializeTextureView();
         loadPOIsFromJSON();
-
-//        createPoints();
-        //createImages();
-        //createTexts();
-
     }
 
     private void loadPOIsFromJSON() {
@@ -147,25 +151,6 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
                     textView.setVisibility(View.INVISIBLE);
                     textView.setTextColor(Color.WHITE);
                     textView.setTextSize(20);
-
-//                    if(p.getPOIType().equals(POI.TYPE_LANDMARK)){
-////                        Drawable d = getDrawable(R.drawable.restaurant);
-////                        d.setBounds(0, 0, 40, 40);
-//                        textView.setCompoundDrawablesWithIntrinsicBounds(R.drawable.restaurant, 0, 0, 0);
-//                    } else if (p.getPOIType().equals(POI.TYPE_RESTAURANT)){
-//                        getDrawable(R.drawable.restaurant).setBounds(0, 0, 40, 40);
-//                        textView.setCompoundDrawablesWithIntrinsicBounds(R.drawable.restaurant, 0, 0, 0);
-//                    } else if (p.getPOIType().equals(POI.TYPE_STORE)){
-//                        getDrawable(R.drawable.store).setBounds(0, 0, 40, 40);
-//                        textView.setCompoundDrawablesWithIntrinsicBounds(R.drawable.store, 0, 0, 0);
-//                    } else if (p.getPOIType().equals(POI.TYPE_UTILITY)){
-//                        getDrawable(R.drawable.utility).setBounds(0, 0, 40, 40);
-//                        textView.setCompoundDrawablesWithIntrinsicBounds(R.drawable.utility, 0, 0, 0);
-//                    }
-
-//                    ImageSpan is = new ImageSpan(this, R.drawable.building);
-//                    SpannableString text = new SpannableString(p.getTitle());
-//                    text.setSpan(is, 5, 15, 0);
                     layout.addView(textView);
                     textView.setText(p.getTitle());
                     final POI finalPOI = p;
@@ -183,59 +168,12 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
                     });
                     points.add(p);
                     POIsToTextViews.put(p, textView);
-                    //System.out.println(p.getTitle() + ": " + p.getDescription());
                 }
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-
-//    private void createPoints() {
-//        points = new POI[5];
-//        points[0] = new POI("Chapel", 36.001901, -78.940278, POI.TYPE_LANDMARK);
-//        points[1] = new POI("West Union",36.000798 ,-78.939011, POI.TYPE_RESTAURANT);
-//        points[2] = new POI("Cameron", 35.997592 , -78.942173, POI.TYPE_LANDMARK);
-//        points[3] = new POI("Fuqua", 35.998843, -78.947274, POI.TYPE_LANDMARK);
-//        points[4] = new POI("LSRC", 36.004361 , -78.941871, POI.TYPE_LANDMARK);
-//    }
-
-//    private void createTexts(){
-//        texts = new TextView[5];
-//
-//        TextView tv1 = (TextView) findViewById(R.id.textView1);
-//        TextView tv2 = (TextView) findViewById(R.id.textView2);
-//        TextView tv3 = (TextView) findViewById(R.id.textView3);
-//        TextView tv4 = (TextView) findViewById(R.id.textView4);
-//        TextView tv5 = (TextView) findViewById(R.id.textView5);
-//
-//        texts[0] = tv1;
-//        texts[1] = tv2;
-//        texts[2] = tv3;
-//        texts[3] = tv4;
-//        texts[4] = tv5;
-//    }
-
-//    private void createImages(){
-//        images = new ImageView[5];
-//
-//        ImageView iv1 = (ImageView) findViewById(R.id.imageView1);
-//        ImageView iv2 = (ImageView) findViewById(R.id.imageView2);
-//        ImageView iv3 = (ImageView) findViewById(R.id.imageView3);
-//        ImageView iv4 = (ImageView) findViewById(R.id.imageView4);
-//        ImageView iv5 = (ImageView) findViewById(R.id.imageView5);
-//
-//        images[0] = iv1;
-//        images[1] = iv2;
-//        images[2] = iv3;
-//        images[3] = iv4;
-//        images[4] = iv5;
-////        for(int i = 0; i < 5; i++){
-////            ImageView iv = new ImageView(this);
-////            iv.setImageResource(R.drawable.building);
-////            images[i] = iv;
-////        }
-//    }
 
     private double fov_x;
     private double fov_y;
@@ -408,9 +346,7 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
     }
 
     @Override
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {
-        // Do we need to add stuff here?
-    }
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {}
 
     final float alpha = 0.15f;
     protected float[] lowPass(float[] input, float[] output) {
@@ -448,9 +384,6 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
             for (POI poi : points) {
                 checkSettingsAndDisplay(poi);
             }
-//            for (POI poi : POIsToTextViews.keySet()) {
-//                checkSettingsAndDisplay(poi);
-//            }
         }
     }
 
@@ -459,13 +392,9 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
         mCurrentLocation = location;
         sortPOIsOnDistance();
         for (POI poi : points) {
-            //System.out.println(poi.getTitle() + " " + poi.getDistanceFromCurrentLocation());
             checkSettingsAndDisplay(poi);
             POIsToTextViews.get(poi).setText(String.format(poi.getTitle() + "\n" + "%.2f" + "km", poi.getDistanceFromCurrentLocation()));
         }
-//        for (POI poi : POIsToTextViews.keySet()) {
-//            checkSettingsAndDisplay(poi);
-//        }
     }
 
     private void checkSettingsAndDisplay(POI poi){
@@ -495,10 +424,6 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
             double distance = ARMath.getPOIDistance(mCurrentLocation.getLongitude(), mCurrentLocation.getLatitude(), poi.getLongitude(), poi.getLatitude());
             poi.setDistanceFromCurrentLocation(distance);
         }
-//        for (POI poi : POIsToTextViews.keySet()){
-//            double distance = ARMath.getPOIDistance(mCurrentLocation.getLongitude(), mCurrentLocation.getLatitude(), poi.getLongitude(), poi.getLatitude());
-//            poi.setDistanceFromCurrentLocation(distance);
-//        }
         Collections.sort(points, POI.getIncreasingDistanceComparator());
     }
 
@@ -515,38 +440,12 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
             double absoluteHeightAngle = ARMath.getAbsoluteHeightAngle(poi.getDistanceFromCurrentLocation(), heightDifference);
             double differenceY = ARMath.getRelativeHeightAngle(mCurrentOrientation[1], absoluteHeightAngle);
 
-//            Add ImageViews
-//            if(differenceX/fov_x <= 1 && differenceY/fov_y <= 1) {
-//                images[i].setVisibility(View.VISIBLE);
-//                if (ARMath.getSide(mCurrentOrientation[0], direction, fov_x) == 0) {
-//                    images[i].setX((float) (activityScreenSize.x*(0.5 + differenceX/fov_x/2) - images[i].getWidth()/2));
-//                } else {
-//                    images[i].setX((float) (activityScreenSize.x*(0.5 - differenceX/fov_x/2) - images[i].getWidth()/2));
-//                }
-//
-//                if (ARMath.getAboveBelow(mCurrentOrientation[1], absoluteHeightAngle) == 0) {
-//                    images[i].setY((float) (activityScreenSize.y*(0.5 + differenceY/fov_y/2) - images[i].getHeight()/2));
-//                } else {
-//                    images[i].setY((float) (activityScreenSize.y*(0.5 - differenceY/fov_y/2) - images[i].getHeight()/2));
-//                }
-//                System.out.println(points[i].getTitle() + ": " + images[i].getX() + " " + images[i].getY());
-//            } else {
-//                images[i].setVisibility(View.INVISIBLE);
-//            }
-
             // Add TextViews
-
-
             TextView textView = POIsToTextViews.get(poi);
 
             currentPOIsDisplayed = checkHowManyPOIOnScreen(poi);
-//            if (currentPOIsDisplayed > maxPOIsToDisp) {
-//                return;
-//            }
-            // System.out.println("currPoiDisplayed: " + currentPOIsDisplayed);
+//
             if(differenceX/fov_x <= 1 && differenceY/fov_y <= 1) {
-                //System.out.println(poi.getTitle() + " " + "layout:" + layout.getWidth() + "," + layout.getHeight() + " textView:" + textView.getWidth() + "," + textView.getHeight());
-                //System.out.println(poi.getTitle() + " " + differenceX);
                 if (ARMath.getSide(mCurrentOrientation[0], direction, fov_x) == 0) {
                     textView.setX((float) (layout.getWidth()*(0.5 + differenceX/35) - textView.getWidth()/2));
                 } else {
@@ -558,36 +457,20 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
                 } else {
                     textView.setY((float) (layout.getHeight()*(0.5 - differenceY/fov_y/2) - textView.getHeight()/2) - points.indexOf(poi)*75);
                 }
+
                 if (maxPOIsToDisp > checkHowManyPOIOnScreen(poi)) {
                     textView.setVisibility(View.VISIBLE);
                 } else {
                     textView.setVisibility(View.INVISIBLE);
                 }
-//                textView.setVisibility(View.VISIBLE);
-                //System.out.println(poi.getTitle() + " " + textView.getX() + " " + textView.getY());
             } else {
                 textView.setVisibility(View.INVISIBLE);
             }
-//            currentPOIsDisplayed = checkHowManyPOIOnScreen();
-
         }
     }
 
     private int checkHowManyPOIOnScreen(POI p) {
         int howmanyVisible = 0;
-//        Rect r = new Rect();
-//        layout.getHitRect(r);
-//        for (POI poi : points) {
-//            if (POIsToTextViews.get(poi).getLocalVisibleRect(r)) {
-//                howmanyVisible++;
-//            }
-//        }
-//        for (TextView view : POIsToTextViews.values()) {
-//            System.out.println(POIsToTextViews.values());
-//            if (view.getVisibility() == View.VISIBLE) {
-//                howmanyVisible++;
-//            }
-//        }
         for (POI poi : points) {
             if (poi != p && POIsToTextViews.get(poi).getVisibility() == View.VISIBLE) {
                 howmanyVisible++;

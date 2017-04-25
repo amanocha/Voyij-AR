@@ -1,7 +1,12 @@
 package voyij.ar;
 
 /**
- * Created by samtoffler on 3/23/17.
+ * Authors: Sam Toffler and Aninda Manocha
+ * Date: March 23, 2017
+ *
+ * This class contains all the mathematical calculations needed to determine the direction and
+ * distance of a POI, as well as the compass and height angles given the phone's current GPS
+ * coordinates.
  */
 
 public class ARMath {
