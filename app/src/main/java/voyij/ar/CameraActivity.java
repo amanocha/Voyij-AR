@@ -120,7 +120,7 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_camera);
-
+        getSupportActionBar().hide();
         getScreenInfo();
 
         mSensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
@@ -131,11 +131,6 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
         initializeSensors();
         initializeTextureView();
         loadPOIsFromJSON();
-
-//        createPoints();
-        //createImages();
-        //createTexts();
-
     }
 
     private void loadPOIsFromJSON() {
@@ -145,7 +140,6 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
                 List<POI> listOfPOIs = JSONToPOIGenerator.unmarshallJSONFile(getAssets().open(JSON_POI_DIRECTORY +"/" + file));
                 for(POI p : listOfPOIs) {
                     TextView textView = new TextView(this);
-//                    textView.setCompoundDrawablesWithIntrinsicBounds(R.drawable.building, 0, 0, 0);
                     textView.setVisibility(View.INVISIBLE);
                     textView.setTextColor(Color.WHITE);
                     textView.setTextSize(20);
@@ -172,9 +166,6 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
                         textView.setCompoundDrawablesWithIntrinsicBounds(d, null, null, null);
                     }
 
-//                    ImageSpan is = new ImageSpan(this, R.drawable.building);
-//                    SpannableString text = new SpannableString(p.getTitle());
-//                    text.setSpan(is, 5, 15, 0);
                     layout.addView(textView);
                     textView.setText(p.getTitle());
                     final POI finalPOI = p;
@@ -192,59 +183,12 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
                     });
                     points.add(p);
                     POIsToTextViews.put(p, textView);
-                    //System.out.println(p.getTitle() + ": " + p.getDescription());
                 }
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-
-//    private void createPoints() {
-//        points = new POI[5];
-//        points[0] = new POI("Chapel", 36.001901, -78.940278, POI.TYPE_LANDMARK);
-//        points[1] = new POI("West Union",36.000798 ,-78.939011, POI.TYPE_RESTAURANT);
-//        points[2] = new POI("Cameron", 35.997592 , -78.942173, POI.TYPE_LANDMARK);
-//        points[3] = new POI("Fuqua", 35.998843, -78.947274, POI.TYPE_LANDMARK);
-//        points[4] = new POI("LSRC", 36.004361 , -78.941871, POI.TYPE_LANDMARK);
-//    }
-
-//    private void createTexts(){
-//        texts = new TextView[5];
-//
-//        TextView tv1 = (TextView) findViewById(R.id.textView1);
-//        TextView tv2 = (TextView) findViewById(R.id.textView2);
-//        TextView tv3 = (TextView) findViewById(R.id.textView3);
-//        TextView tv4 = (TextView) findViewById(R.id.textView4);
-//        TextView tv5 = (TextView) findViewById(R.id.textView5);
-//
-//        texts[0] = tv1;
-//        texts[1] = tv2;
-//        texts[2] = tv3;
-//        texts[3] = tv4;
-//        texts[4] = tv5;
-//    }
-
-//    private void createImages(){
-//        images = new ImageView[5];
-//
-//        ImageView iv1 = (ImageView) findViewById(R.id.imageView1);
-//        ImageView iv2 = (ImageView) findViewById(R.id.imageView2);
-//        ImageView iv3 = (ImageView) findViewById(R.id.imageView3);
-//        ImageView iv4 = (ImageView) findViewById(R.id.imageView4);
-//        ImageView iv5 = (ImageView) findViewById(R.id.imageView5);
-//
-//        images[0] = iv1;
-//        images[1] = iv2;
-//        images[2] = iv3;
-//        images[3] = iv4;
-//        images[4] = iv5;
-////        for(int i = 0; i < 5; i++){
-////            ImageView iv = new ImageView(this);
-////            iv.setImageResource(R.drawable.building);
-////            images[i] = iv;
-////        }
-//    }
 
     private double fov_x;
     private double fov_y;
