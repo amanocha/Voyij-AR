@@ -122,12 +122,14 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
     private boolean showRestaurants;
     private boolean showUtilities;
     private boolean showLandmarks;
+    private int thumbnailWidth = 175;
+    private int thumbnailHeight = 175;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_camera);
-
+        getSupportActionBar().hide();
         getScreenInfo();
 
         mSensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
@@ -147,10 +149,32 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
                 List<POI> listOfPOIs = JSONToPOIGenerator.unmarshallJSONFile(getAssets().open(JSON_POI_DIRECTORY +"/" + file));
                 for(POI p : listOfPOIs) {
                     TextView textView = new TextView(this);
-//                    textView.setCompoundDrawablesWithIntrinsicBounds(R.drawable.building, 0, 0, 0);
                     textView.setVisibility(View.INVISIBLE);
                     textView.setTextColor(Color.WHITE);
                     textView.setTextSize(20);
+
+                    if(p.getPOIType().equals(POI.TYPE_LANDMARK)){
+                        Drawable dr = getDrawable(R.drawable.landmark);
+                        Bitmap bitmap = ((BitmapDrawable) dr).getBitmap();
+                        Drawable d = new BitmapDrawable(getResources(), Bitmap.createScaledBitmap(bitmap, thumbnailWidth, thumbnailHeight, true));
+                        textView.setCompoundDrawablesWithIntrinsicBounds(d, null, null, null);
+                    } else if (p.getPOIType().equals(POI.TYPE_RESTAURANT)){
+                        Drawable dr = getDrawable(R.drawable.restaurant);
+                        Bitmap bitmap = ((BitmapDrawable) dr).getBitmap();
+                        Drawable d = new BitmapDrawable(getResources(), Bitmap.createScaledBitmap(bitmap, thumbnailWidth, thumbnailHeight, true));
+                        textView.setCompoundDrawablesWithIntrinsicBounds(d, null, null, null);
+                    } else if (p.getPOIType().equals(POI.TYPE_STORE)){
+                        Drawable dr = getDrawable(R.drawable.store);
+                        Bitmap bitmap = ((BitmapDrawable) dr).getBitmap();
+                        Drawable d = new BitmapDrawable(getResources(), Bitmap.createScaledBitmap(bitmap, thumbnailWidth, thumbnailHeight, true));
+                        textView.setCompoundDrawablesWithIntrinsicBounds(d, null, null, null);
+                    } else if (p.getPOIType().equals(POI.TYPE_UTILITY)){
+                        Drawable dr = getDrawable(R.drawable.utility);
+                        Bitmap bitmap = ((BitmapDrawable) dr).getBitmap();
+                        Drawable d = new BitmapDrawable(getResources(), Bitmap.createScaledBitmap(bitmap, thumbnailWidth, thumbnailHeight, true));
+                        textView.setCompoundDrawablesWithIntrinsicBounds(d, null, null, null);
+                    }
+
                     layout.addView(textView);
                     textView.setText(p.getTitle());
                     final POI finalPOI = p;
@@ -453,9 +477,9 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
                 }
 
                 if (ARMath.getAboveBelow(mCurrentOrientation[1], absoluteHeightAngle) == 0) {
-                    textView.setY((float) (layout.getHeight()*(0.5 + differenceY/fov_y/2) - textView.getHeight()/2) - points.indexOf(poi)*75);
+                    textView.setY((float) (layout.getHeight()*(0.9 + differenceY/fov_y/2) - textView.getHeight()) - points.indexOf(poi)*175);
                 } else {
-                    textView.setY((float) (layout.getHeight()*(0.5 - differenceY/fov_y/2) - textView.getHeight()/2) - points.indexOf(poi)*75);
+                    textView.setY((float) (layout.getHeight()*(0.9 - differenceY/fov_y/2) - textView.getHeight()) - points.indexOf(poi)*175);
                 }
 
                 if (maxPOIsToDisp > checkHowManyPOIOnScreen(poi)) {

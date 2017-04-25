@@ -26,12 +26,12 @@
 "type": "Feature",
 "geometry": {
 "type": "Point",
-"coordinates": [-78.939744, 36.003394, 109]
+"coordinates": [-78.939822, 36.002283, 109]
 },
 "properties": {
-"title": "Twinnies",
+"title": "Divinity Cafe",
 "POIType" : "Restaurant",
-"description" : "This Irish pub nestled in Duke's newest Engineering building, CIEMAS, offers hot-out-of-the-oven breakfast pastries, made-to-order sandwiches, and fresh entrée salads in addition to its classic blends of coffee and beer on tap"
+"description" : "This “green” environment-friendly eatery serves hot breakfast and lunch with fresh, conventional, vegetarian and Vegan options. Catering also available for large or small events. Enjoy fresh-baked bread and muffins, delicious soups, salads, wraps & more!"
 }
 },{
 "type": "Feature",
