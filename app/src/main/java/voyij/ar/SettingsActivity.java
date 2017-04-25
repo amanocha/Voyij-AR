@@ -34,7 +34,7 @@ public class SettingsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
-
+        getSupportActionBar().hide();
         mPOIRangeSlider = (SeekBar) findViewById(R.id.seekBarRange);
         mCheckBoxPOIStores = (CheckBox) findViewById(R.id.checkBoxStores);
         mCheckBoxPOIRestaurants = (CheckBox) findViewById(R.id.checkBoxRestaurants);
