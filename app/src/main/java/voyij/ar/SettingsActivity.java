@@ -125,6 +125,5 @@ public class SettingsActivity extends AppCompatActivity {
         editor.putBoolean(STATE_SHOW_UTILITIES, mCheckBoxPOIUtilities.isChecked());
         editor.putBoolean(STATE_SHOW_LANDMARKS, mCheckBoxPOILandmarks.isChecked());
         editor.commit();
-        System.out.println("Saved Persistent State to Disk");
     }
 }

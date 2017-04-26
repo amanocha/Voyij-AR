@@ -2,4 +2,9 @@
     <string name="app_name">Voyij AR Map</string>
     <string name="title_activity_maps">Voyij AR Map</string>
     <string name="take_picture">Take picture</string>
+    <!--In main activity-->
+    <string name="no_camera">Sorry, pal. How are you gonna use AR without a camera on your device?</string>
+    <string name="no_gps">Sorry, pal. Can\'t use our app if your device doesn\'t have a GPS.</string>
+    <string name="no_rotation_vector">Sorry, pal. Can\'t use our app if your device doesn\'t have a built-in rotation vector (We don\'t know what a rotation vector is either)</string>
+    <string name="no_permissions">Take picture</string>
 </resources>

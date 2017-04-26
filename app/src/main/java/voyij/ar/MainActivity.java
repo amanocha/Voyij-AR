@@ -34,13 +34,13 @@ public class MainActivity extends AppCompatActivity {
         boolean hasGPS = getPackageManager().hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS);
         boolean hasRotationVector = ((SensorManager) getSystemService(SENSOR_SERVICE)).getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR) != null;
         if(!hasCamera) {
-            Toast.makeText(this, "Sorry, pal. How are you gonna use AR without a camera on your device?", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, R.string.no_camera, Toast.LENGTH_LONG).show();
         }
         if(!hasGPS) {
-            Toast.makeText(this, "Sorry, pal. Can't use our app if your device doesn't have a GPS.", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, R.string.no_gps, Toast.LENGTH_LONG).show();
         }
         if(!hasRotationVector) {
-            Toast.makeText(this, "Sorry, pal. Can't use our app if your device doesn't have a built-in rotation vector (We don't know what a rotation vector is either...)", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, R.string.no_rotation_vector, Toast.LENGTH_LONG).show();
         }
         if (!hasCamera || !hasGPS || !hasRotationVector) {
             return false;
@@ -49,11 +49,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private boolean checkPermissions() {
-        System.out.println("in check permissions");
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 || ActivityCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-//            Toast.makeText(this, "Please give us access to your camera and location!", Toast.LENGTH_LONG).show();
-            System.out.println("in permissions");
             textViewPermissions.setVisibility(View.VISIBLE);
             ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.CAMERA}, PERMISSION_REQUEST_CODE);
             return false;
