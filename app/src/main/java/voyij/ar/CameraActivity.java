@@ -3,6 +3,7 @@ package voyij.ar;
 /**
  * Authors: Sam Toffler, Aninda Manocha, Chirag Tamboli
  * Date: March 23, 2017
+ * Finished: April 26, 2017
  *
  * This class is the main class of the app and contains the camera functionality as well as
  * functions that direct the function of the app based on the behavior of the orientation and
@@ -115,7 +116,6 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
     private boolean showRestaurants;
     private boolean showUtilities;
     private boolean showLandmarks;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
