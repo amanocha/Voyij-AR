@@ -471,15 +471,15 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
 //
             if(differenceX/fov_x <= 1 && differenceY/fov_y <= 1) {
                 if (ARMath.getSide(mCurrentOrientation[0], direction, fov_x) == 0) {
-                    textView.setX((float) (layout.getWidth()*(0.5 + differenceX/35) - textView.getWidth()/2));
+                    textView.setX((float) (layout.getWidth()*(0.5 + differenceX/45) - textView.getWidth()/2));
                 } else {
-                    textView.setX((float) (layout.getWidth()*(0.5 - differenceX/35) - textView.getWidth()/2));
+                    textView.setX((float) (layout.getWidth()*(0.5 - differenceX/45) - textView.getWidth()/2));
                 }
 
                 if (ARMath.getAboveBelow(mCurrentOrientation[1], absoluteHeightAngle) == 0) {
-                    textView.setY((float) (layout.getHeight()*(0.9 + differenceY/fov_y/2) - textView.getHeight()) - points.indexOf(poi)*175);
+                    textView.setY((float) (layout.getHeight()*(0.9 + differenceY/70) - textView.getHeight()) - points.indexOf(poi)*175);
                 } else {
-                    textView.setY((float) (layout.getHeight()*(0.9 - differenceY/fov_y/2) - textView.getHeight()) - points.indexOf(poi)*175);
+                    textView.setY((float) (layout.getHeight()*(0.9 - differenceY/70) - textView.getHeight()) - points.indexOf(poi)*175);
                 }
 
                 if (maxPOIsToDisp > checkHowManyPOIOnScreen(poi)) {
@@ -585,8 +585,8 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
             assert map != null;
             imageDimension = map.getOutputSizes(SurfaceTexture.class)[0];
             // Add permission for camera and let user grant the permission
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(CameraActivity.this, new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_CAMERA_PERMISSION);
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(CameraActivity.this, new String[]{Manifest.permission.CAMERA,} , REQUEST_CAMERA_PERMISSION);
                 return;
             }
             cameraManager.openCamera(cameraId, stateCallback, null);

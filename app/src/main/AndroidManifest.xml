@@ -41,15 +41,17 @@
             android:value="AIzaSyAPD8dwkar-2x5gLAQddT2XzuQ9SGCWh8I" />
 
         <activity
-            android:name=".CameraActivity"
+            android:name=".MainActivity"
             android:label="@string/title_activity_maps">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity android:name=".SettingsActivity" />
-        <activity android:name=".POIActivity"></activity>
+        <activity android:name=".POIActivity" />
+        <activity android:name=".CameraActivity"></activity>
     </application>
 
 </manifest>
