@@ -19,6 +19,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Point;
+import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -62,6 +63,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.vision.text.Text;
 
 public class CameraActivity extends AppCompatActivity implements SensorEventListener, LocationListener {
 
@@ -102,6 +104,7 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
     private int thumbnailTextSize = 20;
     private int thumbnailIconWidth = 175;
     private int thumbnailIconHeight = 175;
+    private int spacingCounter = 0;
     private final double THUMBNAIL_STARTING_POINT_X = 0.5;
     private final double THUMBNAIL_STARTING_POINT_Y = 0.9;
     private final int THUMBNAIL_SPACING_AMOUNT = 175;
@@ -349,6 +352,7 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
             for (POI poi : points) {
                 checkSettingsAndDisplay(poi);
             }
+            spacingCounter = 0;
         }
     }
 
@@ -360,6 +364,7 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
             checkSettingsAndDisplay(poi);
             POIsToTextViews.get(poi).setText(String.format(poi.getTitle() + "\n" + "%.2f" + "km", poi.getDistanceFromCurrentLocation()));
         }
+        spacingCounter = 0;
     }
 
     private void checkSettingsAndDisplay(POI poi){
@@ -415,13 +420,15 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
                 }
 
                 if (ARMath.getAboveBelow(mCurrentOrientation[1], absoluteHeightAngle) == 0) {
-                    textView.setY((float) (layout.getHeight()*(THUMBNAIL_STARTING_POINT_Y + differenceY/EXPERIMENTAL_FOV_Y) - textView.getHeight()) - points.indexOf(poi)*THUMBNAIL_SPACING_AMOUNT);
+                    textView.setY((float) (layout.getHeight()*(THUMBNAIL_STARTING_POINT_Y + differenceY/EXPERIMENTAL_FOV_Y) - textView.getHeight()/2));
                 } else {
-                    textView.setY((float) (layout.getHeight()*(THUMBNAIL_STARTING_POINT_Y - differenceY/EXPERIMENTAL_FOV_Y) - textView.getHeight()) - points.indexOf(poi)*THUMBNAIL_SPACING_AMOUNT);
+                    textView.setY((float) (layout.getHeight()*(THUMBNAIL_STARTING_POINT_Y - differenceY/EXPERIMENTAL_FOV_Y) - textView.getHeight()/2));
                 }
 
                 if (maxPOIsToDisplay > checkHowManyPOIOnScreen(poi)) {
+                    textView.setY(textView.getY() - spacingCounter*THUMBNAIL_SPACING_AMOUNT);
                     textView.setVisibility(View.VISIBLE);
+                    spacingCounter++;
                 } else {
                     textView.setVisibility(View.INVISIBLE);
                 }
@@ -433,8 +440,10 @@ public class CameraActivity extends AppCompatActivity implements SensorEventList
 
     private int checkHowManyPOIOnScreen(POI p) {
         int howManyVisible = 0;
+        Rect scrollBounds = new Rect();
+        layout.getHitRect(scrollBounds);
         for (POI poi : points) {
-            if (poi != p && POIsToTextViews.get(poi).getVisibility() == View.VISIBLE) {
+            if (poi != p && POIsToTextViews.get(poi).getLocalVisibleRect(scrollBounds) && POIsToTextViews.get(poi).getVisibility() == View.VISIBLE) {
                 howManyVisible++;
             }
         }
